@@ -1,6 +1,7 @@
 ---
 name: fable-review
 description: Multi-agent adversarial code review — four parallel finders (correctness, contracts, security, resources), with every finding independently attacked by skeptics before it reaches you. Use for "review this", "check my changes", or as a pre-PR gate.
+argument-hint: "[target]"
 ---
 
 The user invoked /fable-review: that is explicit opt-in to workflow orchestration — call the Workflow tool.

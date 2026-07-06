@@ -17,14 +17,26 @@ const wfDir = path.join(root, '.claude', 'workflows');
 let fail = 0;
 const bad = (file, msg) => { console.log('FAIL', file, '-', msg); fail++; };
 
-// --- collect the name registries ---
-const agentNames = new Set(
-  fs.readdirSync(path.join(root, '.claude', 'agents'))
-    .filter(f => f.endsWith('.md'))
-    .map(f => (fs.readFileSync(path.join(root, '.claude', 'agents', f), 'utf8').match(/^name:\s*(\S+)/m) || [])[1])
-    .filter(Boolean)
-);
+// --- collect the name registries + validate frontmatter ---
+const frontmatter = raw => (raw.match(/^---\r?\n([\s\S]*?)\r?\n---/) || [])[1] || '';
+const agentNames = new Set();
+for (const f of fs.readdirSync(path.join(root, '.claude', 'agents')).filter(f => f.endsWith('.md'))) {
+  const fm = frontmatter(fs.readFileSync(path.join(root, '.claude', 'agents', f), 'utf8'));
+  const name = (fm.match(/^name:\s*(\S+)/m) || [])[1];
+  if (!name) { bad('agents/' + f, 'missing required frontmatter field: name'); continue; }
+  if (name !== path.basename(f, '.md')) bad('agents/' + f, "agent name '" + name + "' does not match the filename");
+  if (!/^description:\s*\S/m.test(fm)) bad('agents/' + f, 'missing required frontmatter field: description');
+  agentNames.add(name);
+}
 const skillNames = new Set(fs.readdirSync(path.join(root, '.claude', 'skills')));
+for (const s of skillNames) {
+  const p = path.join(root, '.claude', 'skills', s, 'SKILL.md');
+  if (!fs.existsSync(p)) { bad('skills/' + s, 'missing SKILL.md'); continue; }
+  const fm = frontmatter(fs.readFileSync(p, 'utf8'));
+  const desc = (fm.match(/^description:\s*(.+)$/m) || ['', ''])[1] + ((fm.match(/^when_to_use:\s*(.+)$/m) || ['', ''])[1]);
+  if (!desc.trim()) bad('skills/' + s, 'missing frontmatter description — the skill will not auto-invoke');
+  if (desc.length > 1536) bad('skills/' + s, 'description + when_to_use is ' + desc.length + ' chars; Claude Code truncates at 1536');
+}
 const workflowNames = new Set();
 const workflows = fs.readdirSync(wfDir).filter(f => f.endsWith('.js'));
 

@@ -1,6 +1,7 @@
 ---
 name: ultra
 description: Run a task with full Fable/Ultracode multi-phase orchestration — understand → design → implement → review, each phase backed by multi-agent workflows with adversarial verification. Use for substantive features, refactors, and audits where the user wants maximum quality over minimum tokens.
+argument-hint: "<task>"
 ---
 
 The user invoked /ultra: that is explicit opt-in to multi-agent workflow orchestration for this task. Call the Workflow tool as directed below without asking for further permission.

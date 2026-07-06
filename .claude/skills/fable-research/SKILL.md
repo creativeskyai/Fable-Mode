@@ -1,6 +1,7 @@
 ---
 name: fable-research
 description: Deep codebase research — five parallel search modalities (names, content, structure, git history, tests), deep-reads of every lead, a cited synthesis, and a completeness critic. Use for "where is X handled", "how does Y work", "what breaks if Z changes". This searches the repo, not the web.
+argument-hint: "<question>"
 ---
 
 The user invoked /fable-research: that is explicit opt-in to workflow orchestration — call the Workflow tool.

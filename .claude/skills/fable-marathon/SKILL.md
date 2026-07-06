@@ -1,6 +1,7 @@
 ---
 name: fable-marathon
 description: Continuous goal-directed operation across many cycles or sessions — maintains a persistent run file (goal, backlog, journal), executes one backlog item per cycle through the full phase discipline, commits at verified milestones, and keeps cycling. Composable with /loop or scheduled tasks for unattended long runs. Use for "keep working on this", overnight runs, or multi-day builds.
+argument-hint: "[goal]"
 ---
 
 The user invoked /fable-marathon: that is explicit opt-in to workflow orchestration and to checkpoint commits at verified milestones — call the Workflow tool and commit without asking again.

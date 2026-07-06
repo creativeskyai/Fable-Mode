@@ -1,6 +1,7 @@
 ---
 name: fable-ship
-description: Release-readiness gate — detects the project's build/test/release mechanics, runs every gate in parallel (checks, repo hygiene, docs), then a skeptic attacks the "ready to ship" claim. Use before releasing, deploying, tagging, or publishing. It verifies readiness; it never deploys.
+description: Release-readiness gate — detects the project's build/test/release mechanics, runs the gates (read-only hygiene first, then checks and docs in parallel), then a skeptic attacks the "ready to ship" claim. Use before releasing, deploying, tagging, or publishing. It verifies readiness; it never deploys.
+argument-hint: "[scope]"
 ---
 
 The user invoked /fable-ship: that is explicit opt-in to workflow orchestration — call the Workflow tool.

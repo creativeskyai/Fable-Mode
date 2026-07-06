@@ -1,6 +1,7 @@
 ---
 name: fable-plan
 description: Judge-panel design — three genuinely different approaches (simplicity-first, robustness-first, evolution-first) scored by independent judges and synthesized into one grounded implementation plan. Use for architecture decisions or "how should I build X".
+argument-hint: "<design question>"
 ---
 
 The user invoked /fable-plan: that is explicit opt-in to workflow orchestration — call the Workflow tool.

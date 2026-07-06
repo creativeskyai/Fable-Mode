@@ -1,6 +1,7 @@
 ---
 name: fable
 description: Enable Fable Mode for this session — the operating doctrine that makes any model work like Fable 5 on Ultracode (phase discipline, workflow orchestration, adversarial verification, readable reporting). Use at session start, or whenever the doctrine is not already loaded via CLAUDE.md.
+argument-hint: "[task]"
 ---
 
 Read `.claude/fable/FABLE.md` in the project root and follow it as your operating doctrine for the rest of the session. It governs pacing, orchestration, verification, and reporting; explicit user instructions in the conversation always override it.

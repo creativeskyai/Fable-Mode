@@ -1,6 +1,7 @@
 ---
 name: fable-exhaust
 description: Loop-until-dry exhaustive hunt — waves of diverse finders keep sweeping until two consecutive rounds surface nothing new, and every fresh finding faces a three-lens judge panel. Use for "find ALL the bugs", full audits, and edge-case sweeps.
+argument-hint: "[what to hunt] [scope]"
 ---
 
 The user invoked /fable-exhaust: that is explicit opt-in to workflow orchestration — call the Workflow tool. This is the most expensive skill in the pack — many agents over several rounds — so note that to the user in one line when you start.
