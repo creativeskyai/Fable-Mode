@@ -1,37 +1,79 @@
-// Syntax-checks the workflow scripts the way the Workflow sandbox actually runs them:
-// `export const meta` stripped, body wrapped in an async function (so top-level
-// return/await are legal). Plain `node --check` false-fails on these files by design.
+// Validates the pack's workflow scripts and the string-name wiring between layers.
+//
+// 1. Syntax-checks each workflow the way the Workflow sandbox runs it: `export const meta`
+//    stripped, body wrapped in an async function (top-level return/await are legal there,
+//    so plain `node --check` false-fails by design). Also rejects sandbox-banned calls.
+// 2. Cross-layer integrity: every 'fable-*' string in a workflow must resolve to an agent
+//    name or workflow meta.name; every backticked fable-* reference in SKILL.md files and
+//    FABLE.md must resolve to a workflow, agent, or skill; each workflow's phase()/phase:
+//    titles must exactly match its meta.phases titles.
 //
 // Usage: node tools/check-workflows.cjs
 const fs = require('fs');
 const path = require('path');
 
-const dir = path.join(__dirname, '..', '.claude', 'workflows');
+const root = path.join(__dirname, '..');
+const wfDir = path.join(root, '.claude', 'workflows');
 let fail = 0;
+const bad = (file, msg) => { console.log('FAIL', file, '-', msg); fail++; };
 
-for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.js'))) {
-  let src = fs.readFileSync(path.join(dir, f), 'utf8');
-  if (!/^export const meta = \{/m.test(src)) {
-    console.log('FAIL', f, '- must begin with a pure-literal "export const meta = {"');
-    fail++;
-    continue;
-  }
-  if (/\bDate\.now\(\)|\bMath\.random\(\)|new Date\(\)/.test(src)) {
-    console.log('FAIL', f, '- Date.now()/Math.random()/argless new Date() throw in the sandbox');
-    fail++;
-    continue;
-  }
-  src = src.replace(/^export const meta/m, 'const meta');
+// --- collect the name registries ---
+const agentNames = new Set(
+  fs.readdirSync(path.join(root, '.claude', 'agents'))
+    .filter(f => f.endsWith('.md'))
+    .map(f => (fs.readFileSync(path.join(root, '.claude', 'agents', f), 'utf8').match(/^name:\s*(\S+)/m) || [])[1])
+    .filter(Boolean)
+);
+const skillNames = new Set(fs.readdirSync(path.join(root, '.claude', 'skills')));
+const workflowNames = new Set();
+const workflows = fs.readdirSync(wfDir).filter(f => f.endsWith('.js'));
+
+// --- per-workflow checks ---
+for (const f of workflows) {
+  const raw = fs.readFileSync(path.join(wfDir, f), 'utf8');
+  if (!/^export const meta = \{/m.test(raw)) { bad(f, 'must begin with a pure-literal "export const meta = {"'); continue; }
+  if (/\bDate\.now\(\)|\bMath\.random\(\)|new Date\(\)/.test(raw)) { bad(f, 'Date.now()/Math.random()/argless new Date() throw in the sandbox'); continue; }
+
   try {
-    new Function(
-      'agent', 'parallel', 'pipeline', 'log', 'phase', 'args', 'budget', 'workflow',
-      'return (async () => {\n' + src + '\n})'
-    );
-    console.log('OK  ', f);
-  } catch (e) {
-    console.log('FAIL', f, '-', e.message);
-    fail++;
+    new Function('agent', 'parallel', 'pipeline', 'log', 'phase', 'args', 'budget', 'workflow',
+      'return (async () => {\n' + raw.replace(/^export const meta/m, 'const meta') + '\n})');
+  } catch (e) { bad(f, e.message); continue; }
+
+  const metaEnd = raw.indexOf('\n}', raw.indexOf('export const meta'));
+  const metaBlock = raw.slice(0, metaEnd);
+  const body = raw.slice(metaEnd);
+
+  const name = (metaBlock.match(/name:\s*'([^']+)'/) || [])[1];
+  if (name) workflowNames.add(name);
+  if (name !== path.basename(f, '.js')) bad(f, "meta.name '" + name + "' does not match the filename");
+
+  const metaTitles = new Set([...metaBlock.matchAll(/title:\s*'([^']+)'/g)].map(m => m[1]));
+  const usedTitles = new Set([...body.matchAll(/phase\('([^']+)'\)/g), ...body.matchAll(/phase:\s*'([^']+)'/g)].map(m => m[1]));
+  for (const t of usedTitles) if (!metaTitles.has(t)) bad(f, "phase '" + t + "' is used in the body but missing from meta.phases");
+  for (const t of metaTitles) if (!usedTitles.has(t)) bad(f, "meta.phases title '" + t + "' is never used in the body");
+}
+
+// second pass: fable-* strings in workflows must be known agents or workflows
+for (const f of workflows) {
+  const raw = fs.readFileSync(path.join(wfDir, f), 'utf8');
+  for (const [, ref] of raw.matchAll(/'(fable-[a-z-]+)'/g)) {
+    if (!agentNames.has(ref) && !workflowNames.has(ref)) bad(f, "'" + ref + "' is not a known agent or workflow name");
   }
 }
 
+// --- skills + doctrine reference checks ---
+const known = new Set([...agentNames, ...workflowNames, ...skillNames]);
+const docs = [path.join(root, '.claude', 'fable', 'FABLE.md')];
+for (const s of skillNames) docs.push(path.join(root, '.claude', 'skills', s, 'SKILL.md'));
+for (const d of docs) {
+  if (!fs.existsSync(d)) { bad(path.relative(root, d), 'missing file'); continue; }
+  const raw = fs.readFileSync(d, 'utf8');
+  for (const [, tok] of raw.matchAll(/`\/?(fable-[a-z-]+)`/g)) {
+    if (!known.has(tok)) bad(path.relative(root, d), "reference `" + tok + "` resolves to no workflow, agent, or skill");
+  }
+}
+
+console.log(fail
+  ? fail + ' problem(s) found'
+  : 'OK: ' + workflows.length + ' workflows valid; wiring intact across ' + agentNames.size + ' agents, ' + workflowNames.size + ' workflows, ' + skillNames.size + ' skills');
 process.exit(fail ? 1 : 0);

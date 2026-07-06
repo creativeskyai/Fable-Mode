@@ -9,3 +9,5 @@ The user invoked /fable-plan: that is explicit opt-in to workflow orchestration 
 2. Run the named workflow `fable-design` with `args: { question: "<the sharpened question>" }`.
 3. Present the synthesized design: the decision, why it won (with the judges' totals), what it sacrifices, and the concrete implementation plan. Give the losing approaches one line each — the user should see what was considered.
 4. Do not start implementing unless the user asked for implementation.
+
+If the Workflow tool is unavailable, run the same structure with Agent-tool subagents: three parallel design agents with divergent stances, three `fable-judge` agents (one rubric each), then one `fable-scribe` synthesis.

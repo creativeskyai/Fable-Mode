@@ -12,6 +12,14 @@ const input = typeof args === 'string' ? { hunt: args } : (args || {})
 const hunt = input.hunt || 'defects: logic bugs, unhandled edge cases, race conditions, resource leaks, and security flaws'
 const scope = input.scope || 'the entire repository'
 
+// Falls back to the default agent when the pack's agents aren't registered yet
+// (agent types load at session start — a fresh install needs a restart).
+const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+  if (!opts.agentType || !String(e).includes('not found')) throw e
+  log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
+  return agent(prompt, { ...opts, agentType: undefined })
+})
+
 const BUGS = {
   type: 'object',
   required: ['findings'],
@@ -64,13 +72,12 @@ let dry = 0
 while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 40_000)) {
   round++
   const found = (await parallel(STANCES.map((stance, i) => () =>
-    agent(
-      'Hunt for ' + hunt + ' in ' + scope + '. Round ' + round + '. Your stance: ' + stance + '.\n' +
-      (seen.size ? 'Already found — do NOT re-report these: ' + Array.from(seen).slice(-80).join('; ') + '\n' : '') +
-      'Report only findings with a concrete failure scenario. Zero findings is a valid result.',
+    run(
+      'Hunt for ' + hunt + ' in ' + scope + '. Round ' + round + '. Your stance: ' + stance + '.' +
+      (seen.size ? '\nAlready found — do NOT re-report these: ' + Array.from(seen).slice(-80).join('; ') : ''),
       { label: 'find:r' + round + 's' + (i + 1), phase: 'Find', schema: BUGS, agentType: 'fable-finder' }
     )
-  ))).filter(Boolean).flatMap(r => r.findings)
+  ))).filter(Boolean).flatMap(r => r.findings || [])
 
   const fresh = found.filter(b => !seen.has(key(b)))
   if (!fresh.length) {
@@ -83,10 +90,10 @@ while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 4
 
   const judged = await parallel(fresh.map(b => () =>
     parallel(LENSES.map(lens => () =>
-      agent(
+      run(
         'Claimed finding in ' + b.file + ':' + b.line + ' — "' + b.title + '". Scenario: ' + b.detail + '\n' +
         'Judge it through ONE lens only — ' + lens + '\n' +
-        'Read the code; do not take the claim on faith. Set real=true only if the claim holds under your lens.',
+        'Set real=true only if the claim holds under your lens.',
         { label: 'verify:' + b.file + ':' + b.line, phase: 'Verify', schema: VERDICT, agentType: 'fable-skeptic' }
       )))
       .then(vs => ({ b, real: vs.filter(Boolean).filter(v => v.real).length >= 2 }))

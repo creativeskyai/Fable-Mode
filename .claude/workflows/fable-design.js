@@ -12,6 +12,14 @@ export const meta = {
 const question = typeof args === 'string' ? args : (args && args.question)
 if (!question) throw new Error('fable-design requires a design question — pass args: { question: "..." }')
 
+// Falls back to the default agent when the pack's agents aren't registered yet
+// (agent types load at session start — a fresh install needs a restart).
+const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+  if (!opts.agentType || !String(e).includes('not found')) throw e
+  log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
+  return agent(prompt, { ...opts, agentType: undefined })
+})
+
 const APPROACH = {
   type: 'object',
   required: ['summary', 'design', 'tradeoffs'],
@@ -66,10 +74,9 @@ const brief = approaches
 const RUBRICS = ['correctness and edge-case coverage', 'implementation cost and risk', 'long-term maintainability']
 
 const judgments = (await parallel(RUBRICS.map(rubric => () =>
-  agent(
+  run(
     'Design question: ' + question + '\n\n' + brief + '\n\n' +
-    'Score EVERY approach from 1 to 10 on this single rubric: ' + rubric + '. ' +
-    'Verify claims against the actual codebase where they are checkable — penalize designs that misread the code.',
+    'Score EVERY approach from 1 to 10 on this single rubric: ' + rubric + '.',
     { label: 'judge:' + rubric.split(' ')[0], phase: 'Judge', schema: SCORES, agentType: 'fable-judge' }
   )
 ))).filter(Boolean)
@@ -83,7 +90,7 @@ const totals = approaches.map((_, i) =>
 const winner = totals.indexOf(Math.max(...totals))
 log('judge panel totals: [' + totals.join(', ') + '] — approach ' + winner + ' wins')
 
-const final = await agent(
+const final = await run(
   'Design question: ' + question + '\n\n' + brief + '\n\n' +
   'Judge panel totals per approach: ' + JSON.stringify(totals) + '. Approach ' + winner + ' won.\n\n' +
   'Write the final design: start from the winning approach, graft in any clearly superior ideas from the runners-up, ' +

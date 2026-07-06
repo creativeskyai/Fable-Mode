@@ -5,7 +5,7 @@ description: Multi-agent adversarial code review — four parallel finders (corr
 
 The user invoked /fable-review: that is explicit opt-in to workflow orchestration — call the Workflow tool.
 
-1. Pin down the target inline first. If arguments were given, they describe it. Otherwise run `git status` and `git diff --stat HEAD` to see what is pending; if the tree is clean, target the most recent commit.
+1. Pin down the target inline first. If arguments were given, they describe it. Otherwise run `git status` and `git diff --stat HEAD` to see what is pending; if the tree is clean, target the most recent commit. If the project is not a git repository, target the files the user named or the most recently modified source files.
 2. Run the named workflow `fable-review` with `args: { target: "<precise description of the change set>", votes: 3 }`. If the user asked for a thorough or audit-grade review, use `votes: 5`.
 3. Report the confirmed findings most-severe-first, in prose a teammate can act on: what breaks, the concrete failure scenario, and the `file:line`. Note how many raw findings the skeptics refuted (so the user knows the list is filtered), and name anything the review did not cover.
 4. Fix findings only if the user asked for fixes; otherwise the report is the deliverable.

@@ -10,9 +10,17 @@ export const meta = {
 
 const input = typeof args === 'string' ? { target: args } : (args || {})
 const target = input.target ||
-  'the uncommitted working-tree changes (run `git status` and `git diff HEAD` to see them); if the tree is clean, review the most recent commit (`git show HEAD`)'
+  'the uncommitted working-tree changes (run `git status` and `git diff HEAD` to see them); if the tree is clean, review the most recent commit (`git show HEAD`); if this is not a git repository, review the most recently modified source files'
 const votes = input.votes || 3
 const needed = Math.floor(votes / 2) + 1
+
+// Falls back to the default agent when the pack's agents aren't registered yet
+// (agent types load at session start — a fresh install needs a restart).
+const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+  if (!opts.agentType || !String(e).includes('not found')) throw e
+  log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
+  return agent(prompt, { ...opts, agentType: undefined })
+})
 
 const FINDINGS = {
   type: 'object',
@@ -51,13 +59,18 @@ const DIMENSIONS = [
   { key: 'resources', focus: 'performance and resource handling: leaks, unbounded growth, N+1 queries, missing timeouts or cancellation, blocking calls on hot paths' },
 ]
 
+const LENSES = [
+  'correctness: trace the claimed failure scenario line by line through the real code — does it actually happen?',
+  'reproduction: can this actually be triggered from real entry points, or is it guarded upstream / unreachable?',
+  'impact: is the consequence as claimed, or benign in context (intended behavior, dead code, test-only path)?',
+]
+
 const perDimension = await pipeline(
   DIMENSIONS,
-  d => agent(
+  d => run(
     'Review ' + target + '.\n\n' +
     'Focus exclusively on this dimension: ' + d.focus + '.\n\n' +
-    'Never report a finding from the diff alone — open the surrounding file and confirm the defect is real in context. ' +
-    'Report only defects with a concrete failure scenario. Do not report style, naming, or hypothetical hardening.',
+    'Never report a finding from the diff alone — open the surrounding file and confirm the defect is real in context.',
     { label: 'find:' + d.key, phase: 'Review', schema: FINDINGS, agentType: 'fable-finder' }
   ),
   (review, d) => {
@@ -65,14 +78,13 @@ const perDimension = await pipeline(
     if (!findings.length) return []
     return parallel(findings.map(f => () =>
       parallel(Array.from({ length: votes }, (_, i) => () =>
-        agent(
+        run(
           'A reviewer claims this defect in ' + f.file + ' line ' + f.line + ' (dimension: ' + d.key + '):\n' +
           '"' + f.title + '"\n' +
           'Claimed failure scenario: ' + f.detail + '\n\n' +
-          'Your job is to REFUTE it (independent attempt ' + (i + 1) + ' of ' + votes + '). ' +
-          'Read the code, trace the failure scenario, run it if practical. ' +
-          'If the defect cannot actually occur, is intended behavior, or the scenario misreads the code, set refuted=true. ' +
-          'If you cannot decide either way, default to refuted=true.',
+          'Your job is to REFUTE it (independent vote ' + (i + 1) + ' of ' + votes + '). ' +
+          'Judge it through ONE lens only — ' + LENSES[i % LENSES.length] + '\n' +
+          'Set refuted=true if the claim fails under your lens.',
           { label: 'verify:' + f.file + ':' + f.line, phase: 'Verify', schema: VERDICT, agentType: 'fable-skeptic' }
         )))
         .then(vs => ({ ...f, dimension: d.key, upheld: vs.filter(Boolean).filter(v => !v.refuted).length >= needed }))

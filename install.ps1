@@ -9,7 +9,7 @@ param(
 
 $src = Join-Path $PSScriptRoot '.claude'
 if (-not (Test-Path $src)) { throw "Pack .claude directory not found next to install.ps1 ($src)" }
-if (-not (Test-Path $Target)) { throw "Target directory does not exist: $Target" }
+if (-not (Test-Path $Target -PathType Container)) { throw "Target is not an existing directory: $Target" }
 
 $dest = Join-Path $Target '.claude'
 New-Item -ItemType Directory -Force $dest | Out-Null
@@ -44,3 +44,4 @@ else {
 }
 
 Write-Host "done: $copied file(s) copied, $skipped skipped (use -Force to overwrite existing files)"
+Write-Host 'restart any open Claude Code session in the target project - agent types register at session start'

@@ -6,8 +6,14 @@
 set -euo pipefail
 
 force=0
-if [ "${1:-}" = "--force" ]; then force=1; shift; fi
-target="${1:?usage: install.sh [--force] /path/to/project}"
+target=""
+for arg in "$@"; do
+    case "$arg" in
+        --force) force=1 ;;
+        *) target="$arg" ;;
+    esac
+done
+[ -n "$target" ] || { echo "usage: install.sh [--force] /path/to/project" >&2; exit 1; }
 
 src="$(cd "$(dirname "$0")" && pwd)/.claude"
 [ -d "$src" ] || { echo "pack .claude directory not found next to install.sh" >&2; exit 1; }
@@ -42,3 +48,4 @@ else
 fi
 
 echo "done: $copied file(s) copied, $skipped skipped (use --force to overwrite existing files)"
+echo "restart any open Claude Code session in the target project - agent types register at session start"

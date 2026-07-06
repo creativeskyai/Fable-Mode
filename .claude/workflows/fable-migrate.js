@@ -15,6 +15,14 @@ if (!input.instruction) throw new Error('fable-migrate requires args: { instruct
 const verifyCmd = input.verify ||
   "the project's standard build and test commands (detect them from the repo: package.json scripts, Makefile, CI config)"
 
+// Falls back to the default agent when the pack's agents aren't registered yet
+// (agent types load at session start — a fresh install needs a restart).
+const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+  if (!opts.agentType || !String(e).includes('not found')) throw e
+  log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
+  return agent(prompt, { ...opts, agentType: undefined })
+})
+
 const SITES = {
   type: 'object',
   required: ['files'],
@@ -33,26 +41,39 @@ const CHECK = {
 }
 
 phase('Discover')
-const sites = await agent(
-  'Migration: ' + input.instruction + '\n\n' +
-  'Find EVERY file that needs to change. Search multiple ways — identifiers, string literals, types, imports, config — so nothing is missed. ' +
-  'Return the complete file list; err toward including a file the transformer can reject over missing one.',
-  { label: 'discover', schema: SITES, agentType: 'fable-scout' }
-)
-if (!sites || !sites.files.length) {
+const MODES = [
+  'identifiers: function, class, and variable names involved in the change, and their call sites',
+  'string literals, log messages, config files, and docs',
+  'types, interfaces, schemas, and import statements',
+  'test files that exercise the changed behavior',
+]
+const discoveries = (await parallel(MODES.map((how, i) => () =>
+  run(
+    'Migration: ' + input.instruction + '\n\n' +
+    'Find every file that needs to change, searching ONLY this modality: ' + how + '. ' +
+    'Other searchers cover other modalities — do not generalize beyond yours. ' +
+    'Err toward including a file the transformer can reject over missing one.',
+    { label: 'discover:' + (i + 1), phase: 'Discover', schema: SITES, agentType: 'fable-scout' }
+  )
+))).filter(Boolean)
+
+const fileSet = new Set()
+for (const d of discoveries) for (const f of d.files || []) fileSet.add(f)
+const files = Array.from(fileSet)
+if (!files.length) {
   log('discovery found no files needing this migration')
   return { transformed: 0, perFileProblems: [], suiteReport: 'skipped — nothing to migrate' }
 }
-log(sites.files.length + ' files to transform')
+log(files.length + ' unique files to transform (from ' + discoveries.length + ' discovery modalities)')
 
 const results = await pipeline(
-  sites.files,
-  f => agent(
+  files,
+  f => run(
     'Apply this migration to ' + f + ' and ONLY this file: ' + input.instruction + '\n' +
-    'Match the surrounding code style. If the file turns out not to need the change, say so and change nothing.',
+    'If the file turns out not to need the change, say so and change nothing.',
     { label: 'transform:' + f, phase: 'Transform', agentType: 'fable-builder' }
   ),
-  (result, f) => agent(
+  (result, f) => run(
     'The file ' + f + ' was just migrated ("' + input.instruction + '"). The transformer reported: ' + result + '\n' +
     'Read the file as it is NOW and verify: the change is applied completely, nothing unrelated was touched, ' +
     'there are no syntax errors, and all in-file references are consistent. Report ok=false with specifics if anything is off.',
@@ -65,9 +86,9 @@ if (bad.length) log(bad.length + ' file(s) failed their per-file check — see p
 
 phase('Final verify')
 const suite = await agent(
-  'A migration just touched ' + sites.files.length + ' files ("' + input.instruction + '"). ' +
+  'A migration just touched ' + files.length + ' files ("' + input.instruction + '"). ' +
   'Run ' + verifyCmd + ' and report the outcome verbatim — do not fix anything, just report what passed and what failed.',
   { label: 'project-checks', phase: 'Final verify' }
 )
 
-return { transformed: sites.files.length, perFileProblems: bad, suiteReport: suite }
+return { transformed: files.length, perFileProblems: bad, suiteReport: suite }

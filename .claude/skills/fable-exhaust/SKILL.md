@@ -9,3 +9,5 @@ The user invoked /fable-exhaust: that is explicit opt-in to workflow orchestrati
 2. Run the named workflow `fable-exhaust` with `args: { hunt: "<what>", scope: "<where>" }`.
 3. Report the confirmed findings grouped by file, each with its failure scenario and `file:line`. State how many rounds ran and whether the hunt ran dry or stopped at the round/budget cap — the user must know whether coverage is complete.
 4. Fix findings only on request.
+
+If the Workflow tool is unavailable, run the same structure with Agent-tool subagents: rounds of four parallel `fable-finder` agents with distinct stances, three `fable-skeptic` lenses per fresh finding (two of three to confirm), stopping after two consecutive rounds with nothing new.

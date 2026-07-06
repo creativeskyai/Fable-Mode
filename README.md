@@ -1,6 +1,6 @@
 # Fable-Mode
 
-Drop-in `.claude/` assets that give any Claude Code project the **Fable 5 / Ultracode working style** on any model (Opus, Sonnet, Haiku): phase discipline, multi-agent workflow orchestration, adversarial verification of every finding, loop-until-dry exhaustiveness, and Fable-grade reporting.
+Drop-in `.claude/` assets that give any Claude Code project the **Fable 5 / Ultracode working style** on any model (Opus, Sonnet, Haiku): phase discipline across the whole lifecycle (planning → design → development → deployment), multi-agent workflow orchestration, adversarial verification of every finding, loop-until-dry exhaustiveness, continuous long-run operation, and Fable-grade reporting.
 
 Prompts can't change model weights — what this pack ports is the **process**, and most of what makes Ultracode output trustworthy is process: independent perspectives, skeptics that kill plausible-but-wrong claims, completeness critics, and honest reporting of what was and wasn't covered.
 
@@ -20,17 +20,20 @@ Prompts can't change model weights — what this pack ports is the **process**, 
 ├── workflows/              # named workflows for the Workflow tool
 │   ├── fable-understand.js #   partition → parallel deep-read → architecture brief
 │   ├── fable-design.js     #   3 divergent designs → judge panel → synthesis
-│   ├── fable-review.js     #   4 review dimensions → N skeptics per finding
+│   ├── fable-review.js     #   4 review dimensions → N lens-diverse skeptics per finding
 │   ├── fable-research.js   #   5-modality sweep → deep-read → synthesis → critic
 │   ├── fable-exhaust.js    #   loop-until-dry hunt with 3-lens verification
-│   └── fable-migrate.js    #   discover sites → transform each → check each → run suite
+│   ├── fable-migrate.js    #   4-modality discovery → transform each → check each → run suite
+│   └── fable-ship.js       #   release-readiness gate: detect checks → run gates → skeptic verdict
 └── skills/                 # slash commands
     ├── fable/              #   /fable — load the doctrine (if not wired into CLAUDE.md)
-    ├── ultra/              #   /ultra <task> — full 4-phase orchestration
+    ├── ultra/              #   /ultra <task> — full multi-phase orchestration
     ├── fable-review/       #   /fable-review [target]
     ├── fable-plan/         #   /fable-plan <design question>
     ├── fable-research/     #   /fable-research <question>
-    └── fable-exhaust/      #   /fable-exhaust [what/where]
+    ├── fable-exhaust/      #   /fable-exhaust [what/where]
+    ├── fable-ship/         #   /fable-ship [scope] — release gate (verifies; never deploys)
+    └── fable-marathon/     #   /fable-marathon [goal] — continuous goal-directed operation
 ```
 
 ## Install
@@ -56,18 +59,35 @@ The installer copies the `.claude/` assets (never overwriting existing files unl
 
 Manual install is the same two steps: copy the `.claude/` folder contents into the project's `.claude/`, and add the import line. If you prefer not to touch `CLAUDE.md` at all, skip the import and run `/fable` at the start of a session instead.
 
+**Restart any open Claude Code session in the target project after installing** — agent types register at session start and don't hot-reload. (The workflows survive an unregistered agent by falling back to the default agent type, with a log line telling you to restart.)
+
 ## Usage
 
 With the doctrine wired into `CLAUDE.md`, no commands are needed — the model treats every substantive task as an Ultracode task: it maps before designing, panels wide decisions, reviews its own diffs with skeptics, and reports what it didn't cover. The skills are for invoking specific machinery directly:
 
 | Command | What runs |
 |---|---|
-| `/ultra add rate limiting to the API` | understand → design → implement → review, full pipeline |
-| `/fable-review` | 4 finder dimensions, every finding attacked by 3 skeptics |
+| `/ultra add rate limiting to the API` | understand → design → implement → review (→ ship), full pipeline |
+| `/fable-review` | 4 finder dimensions, every finding attacked by lens-diverse skeptics |
 | `/fable-plan how should auth tokens be stored?` | 3 divergent designs, 3-judge panel, synthesized plan |
 | `/fable-research where do we validate uploads?` | 5 search modalities, cited answer, completeness critic |
 | `/fable-exhaust` | rounds of diverse finders until two rounds come up dry |
+| `/fable-ship` | release-readiness gate: project checks + hygiene + docs, skeptic verdict |
+| `/fable-marathon build out the v2 API` | continuous cycles: one backlog item per cycle, verified, committed |
 | `/fable` | load the doctrine mid-session (fallback when CLAUDE.md isn't wired) |
+
+## Continuous operation
+
+`/fable-marathon` is built for long runs. It keeps all state in `FABLE-RUN.md` at the project root (goal, backlog with statuses, journal, next action), executes one backlog item per cycle through the full phase discipline, and commits at verified milestones — so every cycle is resumable from the file alone, across sessions, compactions, or machines.
+
+For unattended operation, compose it with whatever loop mechanism your Claude Code version provides:
+
+```
+/loop /fable-marathon        # self-paced recurring cycles
+/loop 30m /fable-marathon    # fixed interval
+```
+
+or point a scheduled task / cron-style routine at the same command. Marathon stops cycling on its own only for things that are genuinely the user's: an empty backlog, input only they can provide, or a destructive/deploy action (which it gates behind `/fable-ship` and hands to you).
 
 ## How it maps to Fable 5 Ultracode
 
@@ -75,7 +95,7 @@ With the doctrine wired into `CLAUDE.md`, no commands are needed — the model t
 |---|---|
 | Workflow orchestration by default | standing authorization in `FABLE.md`, plus per-skill opt-in |
 | Adversarial verify (N refuting skeptics, majority kills) | `fable-review.js` verify stage; `fable-skeptic` agent |
-| Perspective-diverse verification | `fable-exhaust.js` three-lens judge panels |
+| Perspective-diverse verification | three-lens panels in `fable-review.js` and `fable-exhaust.js` |
 | Judge panel for wide solution spaces | `fable-design.js` + `fable-judge` agent |
 | Loop-until-dry discovery | `fable-exhaust.js` (2 consecutive dry rounds to stop) |
 | Multi-modal sweep | `fable-research.js` (names, content, structure, history, tests) |
@@ -83,6 +103,8 @@ With the doctrine wired into `CLAUDE.md`, no commands are needed — the model t
 | No silent caps | every workflow `log()`s anything it bounded; doctrine requires it in reports |
 | Fable reporting standards | `FABLE.md` Reporting section + `fable-scribe` agent |
 | Token-budget awareness (`+500k` directives) | `fable-exhaust.js` checks `budget.remaining()` each round |
+| Long-running autonomous work | `/fable-marathon` + `FABLE-RUN.md` state file; composes with `/loop` |
+| Release gating before deploys | `fable-ship.js` + `/fable-ship` (verifies readiness; never deploys) |
 
 ## Tuning
 
