@@ -4,7 +4,7 @@ export const meta = {
   whenToUse: 'Before shipping, releasing, or deploying. Verifies readiness and reports blockers with evidence — it never deploys. args: { scope?: string } or a plain string describing what is being shipped',
   phases: [
     { title: 'Detect' },
-    { title: 'Gate', detail: 'build, tests, repo hygiene, docs — in parallel' },
+    { title: 'Gate', detail: 'hygiene first (read-only), then build/tests and docs in parallel' },
     { title: 'Challenge', detail: 'skeptic attacks the readiness claim' },
   ],
 }
@@ -59,31 +59,36 @@ const mech = await run(
 const commands = (mech && mech.commands) || []
 log(commands.length + ' project check(s) detected' + (commands.length ? ': ' + commands.map(c => c.purpose).join(', ') : ' — gates will note the absence'))
 
+// Hygiene runs first and alone: the checks gate may dirty the working tree
+// (build artifacts, snapshot updates), which would poison a concurrent audit.
+const hygiene = await run(
+  'Shipping ' + scope + '. Audit repo hygiene: uncommitted or untracked files that should be in (or out of) the release, ' +
+  'version/changelog consistency with recent changes, leftover debug code or TODO markers in the shipping surface, ' +
+  'and anything staged that looks like a secret. Report with path:line evidence.',
+  { label: 'gate:hygiene', phase: 'Gate', agentType: 'fable-scout' }
+)
+
 const GATES = [
   {
     key: 'checks',
+    agentType: undefined,
     prompt: 'Shipping ' + scope + '. Run each of these project checks and report every outcome verbatim — do not fix anything:\n' +
       (commands.length ? commands.map(c => c.purpose + ': ' + c.command).join('\n') : '(none detected — say so and report what you would have expected to find)'),
   },
   {
-    key: 'hygiene',
-    prompt: 'Shipping ' + scope + '. Audit repo hygiene: uncommitted or untracked files that should be in (or out of) the release, ' +
-      'version/changelog consistency with recent changes, leftover debug code or TODO markers in the shipping surface, ' +
-      'and anything staged that looks like a secret. Report with path:line evidence.',
-  },
-  {
     key: 'docs',
+    agentType: 'fable-scout',
     prompt: 'Shipping ' + scope + '. Check that README, usage docs, and any install/upgrade instructions still match current behavior ' +
       'for what is being shipped. Report only real mismatches, with path:line evidence.',
   },
 ]
 
 const reports = await parallel(GATES.map(g => () =>
-  run(g.prompt, { label: 'gate:' + g.key, phase: 'Gate', agentType: g.key === 'checks' ? undefined : 'fable-scout' })
+  run(g.prompt, { label: 'gate:' + g.key, phase: 'Gate', agentType: g.agentType })
     .then(r => ({ gate: g.key, report: r }))
 ))
 
-const gateReports = reports.filter(Boolean)
+const gateReports = [hygiene && { gate: 'hygiene', report: hygiene }, ...reports].filter(Boolean)
 
 phase('Challenge')
 const verdict = await run(
@@ -96,6 +101,10 @@ const verdict = await run(
   { label: 'challenge', phase: 'Challenge', schema: READINESS, agentType: 'fable-skeptic' }
 )
 
-if (!verdict) return { ready: false, blockers: ['the readiness skeptic did not complete — treat as not ready'], warnings: [], gateReports }
-log(verdict.ready ? 'ready to ship (' + verdict.warnings.length + ' warnings)' : 'NOT ready: ' + verdict.blockers.length + ' blocker(s)')
-return { ready: verdict.ready, blockers: verdict.blockers, warnings: verdict.warnings, gateReports }
+const shipCommands = commands
+const releaseNotes = (mech && mech.notes) || ''
+if (!verdict) return { ready: false, blockers: ['the readiness skeptic did not complete — treat as not ready'], warnings: [], shipCommands, releaseNotes, gateReports }
+const blockers = verdict.blockers || []
+const warnings = verdict.warnings || []
+log(verdict.ready ? 'ready to ship (' + warnings.length + ' warnings)' : 'NOT ready: ' + blockers.length + ' blocker(s)')
+return { ready: verdict.ready, blockers, warnings, shipCommands, releaseNotes, gateReports }

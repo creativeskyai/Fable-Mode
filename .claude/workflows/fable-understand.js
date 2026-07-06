@@ -52,7 +52,7 @@ log(partition.areas.length + ' areas: ' + partition.areas.map(a => a.name).join(
 const briefs = await pipeline(
   partition.areas,
   a => run(
-    'Deep-read the "' + a.name + '" area of this codebase (paths: ' + a.paths.join(', ') + '). Overall focus: ' + focus + '.\n' +
+    'Deep-read the "' + a.name + '" area of this codebase (paths: ' + (a.paths || []).join(', ') + '). Overall focus: ' + focus + '.\n' +
     'Answer with path:line evidence: ' + a.question + '\n' +
     'Also report: the area\'s public surface (what the rest of the code calls into), its key invariants, and anything surprising or fragile.',
     { label: 'read:' + a.name, phase: 'Read', agentType: 'fable-scout' }

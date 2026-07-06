@@ -8,8 +8,8 @@ param(
 )
 
 $src = Join-Path $PSScriptRoot '.claude'
-if (-not (Test-Path $src)) { throw "Pack .claude directory not found next to install.ps1 ($src)" }
-if (-not (Test-Path $Target -PathType Container)) { throw "Target is not an existing directory: $Target" }
+if (-not (Test-Path -LiteralPath $src)) { throw "Pack .claude directory not found next to install.ps1 ($src)" }
+if (-not (Test-Path -LiteralPath $Target -PathType Container)) { throw "Target is not an existing directory: $Target" }
 
 $dest = Join-Path $Target '.claude'
 New-Item -ItemType Directory -Force $dest | Out-Null
@@ -19,24 +19,24 @@ $skipped = 0
 Get-ChildItem -Path $src -Recurse -File | ForEach-Object {
     $rel = $_.FullName.Substring($src.Length).TrimStart('\', '/')
     $out = Join-Path $dest $rel
-    if ((Test-Path $out) -and -not $Force) {
+    if ((Test-Path -LiteralPath $out) -and -not $Force) {
         Write-Host "skip (exists): .claude\$rel"
         $script:skipped++
         return
     }
     New-Item -ItemType Directory -Force (Split-Path $out) | Out-Null
-    Copy-Item $_.FullName $out -Force
+    Copy-Item -LiteralPath $_.FullName -Destination $out -Force
     $script:copied++
 }
 
 $claudeMd = Join-Path $Target 'CLAUDE.md'
 $import = '@.claude/fable/FABLE.md'
-if (-not (Test-Path $claudeMd)) {
-    Set-Content -Path $claudeMd -Value "# Fable Mode`n$import`n"
+if (-not (Test-Path -LiteralPath $claudeMd)) {
+    Set-Content -LiteralPath $claudeMd -Value "# Fable Mode`n$import`n"
     Write-Host 'created CLAUDE.md with the Fable Mode import'
 }
-elseif (-not (Select-String -Path $claudeMd -Pattern ([regex]::Escape($import)) -Quiet)) {
-    Add-Content -Path $claudeMd -Value "`n# Fable Mode`n$import"
+elseif (-not (Select-String -LiteralPath $claudeMd -Pattern ([regex]::Escape($import)) -Quiet)) {
+    Add-Content -LiteralPath $claudeMd -Value "`n# Fable Mode`n$import"
     Write-Host 'appended the Fable Mode import to CLAUDE.md'
 }
 else {

@@ -21,7 +21,7 @@ node tools/check-workflows.cjs
 
 ## Architecture: four layers wired by name
 
-1. **Doctrine** — `.claude/fable/FABLE.md`. Always-on operating contract, loaded via a `@.claude/fable/FABLE.md` import in the target's CLAUDE.md (created/appended by the installers). Its workflow table must stay in sync with the actual workflow names and args.
+1. **Doctrine** — `.claude/fable/FABLE.md`. Always-on operating contract, loaded via a `@.claude/fable/FABLE.md` import in the target's CLAUDE.md (created/appended by the installers). Its Orchestration list must stay in sync with the actual workflow names (the checker verifies the names resolve).
 2. **Agents** — `.claude/agents/fable-*.md`. Seven subagents (scout, finder, skeptic, judge, builder, critic, scribe) that everything else is built from.
 3. **Workflows** — `.claude/workflows/fable-*.js`. Scripts for the Workflow tool that fan out over the agents.
 4. **Skills** — `.claude/skills/*/SKILL.md`. Slash commands that invoke the workflows by name and report results.

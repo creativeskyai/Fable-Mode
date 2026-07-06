@@ -10,7 +10,11 @@ target=""
 for arg in "$@"; do
     case "$arg" in
         --force) force=1 ;;
-        *) target="$arg" ;;
+        --*) echo "unknown option: $arg" >&2; exit 1 ;;
+        *)
+            [ -z "$target" ] || { echo "unexpected extra argument: $arg" >&2; exit 1; }
+            target="$arg"
+            ;;
     esac
 done
 [ -n "$target" ] || { echo "usage: install.sh [--force] /path/to/project" >&2; exit 1; }
