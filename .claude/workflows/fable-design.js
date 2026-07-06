@@ -1,0 +1,94 @@
+export const meta = {
+  name: 'fable-design',
+  description: 'Generate competing designs from divergent stances, score them with a judge panel, synthesize the winner',
+  whenToUse: 'Architecture or implementation-approach decisions where the solution space is wide. args: { question: string } or a plain string',
+  phases: [
+    { title: 'Design', detail: 'independent approaches from divergent stances' },
+    { title: 'Judge', detail: 'each judge scores every approach on one rubric' },
+    { title: 'Synthesize' },
+  ],
+}
+
+const question = typeof args === 'string' ? args : (args && args.question)
+if (!question) throw new Error('fable-design requires a design question — pass args: { question: "..." }')
+
+const APPROACH = {
+  type: 'object',
+  required: ['summary', 'design', 'tradeoffs'],
+  properties: {
+    summary: { type: 'string', description: 'one-paragraph pitch' },
+    design: { type: 'string', description: 'the full design: components, data flow, key files to touch, sequencing' },
+    tradeoffs: { type: 'string', description: 'what this design sacrifices and where it will hurt' },
+  },
+}
+
+const SCORES = {
+  type: 'object',
+  required: ['scores'],
+  properties: {
+    scores: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['approach', 'score', 'reasoning'],
+        properties: {
+          approach: { type: 'integer', description: 'index of the approach being scored' },
+          score: { type: 'integer', description: '1 to 10, using the full range' },
+          reasoning: { type: 'string' },
+        },
+      },
+    },
+  },
+}
+
+const STANCES = [
+  'simplicity-first: the smallest design that fully solves the problem; prefer boring, proven mechanisms',
+  'robustness-first: design from the failure modes backwards; make the hard edge cases first-class citizens',
+  'evolution-first: optimize for how this will be extended and maintained over the next year',
+]
+
+const approaches = (await parallel(STANCES.map((stance, i) => () =>
+  agent(
+    'Design question: ' + question + '\n\n' +
+    'Explore the codebase first so the design is grounded in what actually exists — cite real files. ' +
+    'Then produce ONE complete design, taking this stance: ' + stance + '. ' +
+    'Commit to the stance; do not hedge toward a middle ground. Honest tradeoffs make the panel work.',
+    { label: 'design:' + (i + 1), phase: 'Design', schema: APPROACH }
+  )
+))).filter(Boolean)
+
+if (!approaches.length) throw new Error('no design approaches were produced')
+
+const brief = approaches
+  .map((a, i) => '--- Approach ' + i + ' ---\n' + a.summary + '\n\n' + a.design + '\n\nTradeoffs: ' + a.tradeoffs)
+  .join('\n\n')
+
+const RUBRICS = ['correctness and edge-case coverage', 'implementation cost and risk', 'long-term maintainability']
+
+const judgments = (await parallel(RUBRICS.map(rubric => () =>
+  agent(
+    'Design question: ' + question + '\n\n' + brief + '\n\n' +
+    'Score EVERY approach from 1 to 10 on this single rubric: ' + rubric + '. ' +
+    'Verify claims against the actual codebase where they are checkable — penalize designs that misread the code.',
+    { label: 'judge:' + rubric.split(' ')[0], phase: 'Judge', schema: SCORES, agentType: 'fable-judge' }
+  )
+))).filter(Boolean)
+
+const totals = approaches.map((_, i) =>
+  judgments.reduce((sum, j) => {
+    const s = (j.scores || []).find(x => x.approach === i)
+    return sum + (s ? s.score : 0)
+  }, 0)
+)
+const winner = totals.indexOf(Math.max(...totals))
+log('judge panel totals: [' + totals.join(', ') + '] — approach ' + winner + ' wins')
+
+const final = await agent(
+  'Design question: ' + question + '\n\n' + brief + '\n\n' +
+  'Judge panel totals per approach: ' + JSON.stringify(totals) + '. Approach ' + winner + ' won.\n\n' +
+  'Write the final design: start from the winning approach, graft in any clearly superior ideas from the runners-up, ' +
+  'and resolve the weaknesses the judges flagged. Deliver a concrete implementation plan: files to change, in what order, with what tests.',
+  { label: 'synthesize', phase: 'Synthesize', agentType: 'fable-scribe' }
+)
+
+return { design: final, totals, winner }
