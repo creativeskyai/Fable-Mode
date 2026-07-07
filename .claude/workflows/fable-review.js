@@ -65,6 +65,9 @@ const LENSES = [
   'impact: is the consequence as claimed, or benign in context (intended behavior, dead code, test-only path)?',
 ]
 
+// Must stay single-line — the drift checker compares this line byte-for-byte across workflows.
+const CONTRAST = 'First state the strongest concrete case that the claim is REAL, then the strongest case that it is NOT, then decide: set refuted=true only if the against-case wins under your lens, citing the decisive evidence.'
+
 const perDimension = await pipeline(
   DIMENSIONS,
   d => run(
@@ -82,12 +85,11 @@ const perDimension = await pipeline(
           'A reviewer claims this defect in ' + f.file + ' line ' + f.line + ' (dimension: ' + d.key + '):\n' +
           '"' + f.title + '"\n' +
           'Claimed failure scenario: ' + f.detail + '\n\n' +
-          'Your job is to REFUTE it (independent vote ' + (i + 1) + ' of ' + votes + '). ' +
-          'Judge it through ONE lens only — ' + LENSES[i % LENSES.length] + '\n' +
-          'Set refuted=true if the claim fails under your lens.',
+          'Independent vote ' + (i + 1) + ' of ' + votes + '. Judge it through ONE lens only — ' + LENSES[i % LENSES.length] + '\n' +
+          CONTRAST,
           { label: 'verify:' + f.file + ':' + f.line, phase: 'Verify', schema: VERDICT, agentType: 'fable-skeptic' }
         )))
-        .then(vs => ({ ...f, dimension: d.key, upheld: vs.filter(Boolean).filter(v => !v.refuted).length >= needed }))
+        .then(vs => ({ ...f, dimension: d.key, upheld: vs.filter(v => v && v.refuted === false).length >= needed }))
     ))
   }
 )

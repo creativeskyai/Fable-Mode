@@ -1,0 +1,70 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tools/check-workflows.cjs
+
+  install-sh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fresh install copies every pack file and exactly one import line
+        run: |
+          t="$(mktemp -d)"
+          echo "T=$t" >> "$GITHUB_ENV"
+          expected="$(git ls-files .claude | wc -l)"
+          ./install.sh "$t"
+          copied="$(find "$t/.claude" -type f | wc -l)"
+          [ "$copied" -eq "$expected" ] || { echo "expected $expected files, found $copied"; exit 1; }
+          [ "$(grep -cF '@.claude/fable/FABLE.md' "$t/CLAUDE.md")" -eq 1 ]
+      - name: second run is idempotent
+        run: |
+          ./install.sh "$T" | tee out2.log
+          grep -q 'done: 0 file(s) copied' out2.log
+          [ "$(grep -cF '@.claude/fable/FABLE.md' "$T/CLAUDE.md")" -eq 1 ]
+      - name: update restores pack files and leaves user files alone
+        run: |
+          echo tampered >> "$T/.claude/fable/FABLE.md"
+          echo user-owned > "$T/.claude/agents/user-own.md"
+          ./install.sh --update "$T"
+          cmp .claude/fable/FABLE.md "$T/.claude/fable/FABLE.md"
+          [ "$(cat "$T/.claude/agents/user-own.md")" = "user-owned" ]
+
+  install-ps1:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fresh install, idempotent second run, update semantics
+        shell: pwsh
+        run: |
+          $t = Join-Path $env:RUNNER_TEMP 'fable-target'
+          New-Item -ItemType Directory $t | Out-Null
+          $expected = @(git ls-files .claude).Count
+
+          .\install.ps1 -Target $t
+          $copied = @(Get-ChildItem -Recurse -File (Join-Path $t '.claude')).Count
+          if ($copied -ne $expected) { throw "expected $expected files, found $copied" }
+          $imports = @(Select-String -Path (Join-Path $t 'CLAUDE.md') -SimpleMatch '@.claude/fable/FABLE.md').Count
+          if ($imports -ne 1) { throw "expected 1 import line, found $imports" }
+
+          $out2 = (.\install.ps1 -Target $t 6>&1) | Out-String
+          if ($out2 -notmatch 'done: 0 file\(s\) copied') { throw "second run copied files:`n$out2" }
+          $imports = @(Select-String -Path (Join-Path $t 'CLAUDE.md') -SimpleMatch '@.claude/fable/FABLE.md').Count
+          if ($imports -ne 1) { throw "expected 1 import line after second run, found $imports" }
+
+          Add-Content (Join-Path $t '.claude\fable\FABLE.md') 'tampered'
+          Set-Content (Join-Path $t '.claude\agents\user-own.md') 'user-owned'
+          .\install.ps1 -Target $t -Update
+          $a = (Get-FileHash .claude\fable\FABLE.md).Hash
+          $b = (Get-FileHash (Join-Path $t '.claude\fable\FABLE.md')).Hash
+          if ($a -ne $b) { throw 'update did not restore FABLE.md byte-identical' }
+          if ((Get-Content (Join-Path $t '.claude\agents\user-own.md')) -ne 'user-owned') { throw 'update touched a user-owned file' }

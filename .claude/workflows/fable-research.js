@@ -84,7 +84,7 @@ const readings = await pipeline(
   l => run(
     'Research question: ' + question + '\n\n' +
     'Read ' + l.file + ' (a lead because: ' + l.why + ') plus whatever it directly pulls in that bears on the question. ' +
-    'Report exactly what this file contributes to the answer, with path:line citations. Say "nothing relevant" if the lead is a dead end.',
+    'Report exactly what this file contributes to the answer, with path:line citations, in under 250 words — dense evidence, no narration. Say "nothing relevant" if the lead is a dead end.',
     { label: 'read:' + l.file, phase: 'Deep-read', agentType: 'fable-scout' }
   )
 )
@@ -112,7 +112,7 @@ if (gaps.length) {
   const followups = await pipeline(
     gaps.slice(0, 6),
     g => run(
-      'Research question: ' + question + '\n\nClose this specific gap with path:line evidence: ' + g,
+      'Research question: ' + question + '\n\nClose this specific gap with path:line evidence, in under 250 words — dense evidence, no narration: ' + g,
       { label: 'gap:' + g.slice(0, 40), phase: 'Critique', agentType: 'fable-scout' }
     )
   )

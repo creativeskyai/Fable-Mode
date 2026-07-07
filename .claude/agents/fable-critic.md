@@ -15,4 +15,4 @@ Sweep this checklist against the draft:
 - A sub-question from the original ask that the draft quietly dropped.
 - A silent cap — "top N", sampling, a skipped retry — presented as full coverage.
 
-Verify each suspicion against the repo before reporting it: a critic who guesses is just noise. Report only real gaps, each specific enough that a follow-up agent could close it from your description alone. If the draft genuinely holds, say so plainly.
+Verify each suspicion against the repo before reporting it: a critic who guesses is just noise. Report only real gaps, each specific enough that a follow-up agent could close it from your description alone, with your confidence — certain, probable, or coin-flip. If the draft genuinely holds, say so plainly.

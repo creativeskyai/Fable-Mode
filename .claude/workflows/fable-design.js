@@ -67,15 +67,19 @@ const approaches = (await parallel(STANCES.map((stance, i) => () =>
 
 if (!approaches.length) throw new Error('no design approaches were produced')
 
-const brief = approaches
-  .map((a, i) => '--- Approach ' + i + ' ---\n' + a.summary + '\n\n' + a.design + '\n\nTradeoffs: ' + a.tradeoffs)
-  .join('\n\n')
+// Each judge sees the approaches in a different order (rotated by judge index —
+// the sandbox bans Math.random) so no approach always enjoys first position.
+// Approach numbers in the headers stay canonical; scores key off them, not position.
+const card = i => '--- Approach ' + i + ' ---\n' + approaches[i].summary + '\n\n' + approaches[i].design + '\n\nTradeoffs: ' + approaches[i].tradeoffs
+const briefFor = offset => approaches.map((_, k) => card((k + offset) % approaches.length)).join('\n\n')
+const brief = briefFor(0)
 
 const RUBRICS = ['correctness and edge-case coverage', 'implementation cost and risk', 'long-term maintainability']
 
-const judgments = (await parallel(RUBRICS.map(rubric => () =>
+const judgments = (await parallel(RUBRICS.map((rubric, j) => () =>
   run(
-    'Design question: ' + question + '\n\n' + brief + '\n\n' +
+    'Design question: ' + question + '\n\n' + briefFor(j) + '\n\n' +
+    'Presentation order is arbitrary — the approach number in each header, not position, identifies a candidate. ' +
     'Score EVERY approach from 1 to 10 on this single rubric: ' + rubric + '.',
     { label: 'judge:' + rubric.split(' ')[0], phase: 'Judge', schema: SCORES, agentType: 'fable-judge' }
   )

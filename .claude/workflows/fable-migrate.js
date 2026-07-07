@@ -41,11 +41,14 @@ const CHECK = {
 }
 
 phase('Discover')
+// Kept word-for-word in sync with the shared modalities in fable-research.js (which
+// adds a fifth, git-history modality) — a diff between the lists should show only
+// the intended differences.
 const MODES = [
-  'identifiers: function, class, and variable names involved in the change, and their call sites',
-  'string literals, log messages, config files, and docs',
-  'types, interfaces, schemas, and import statements',
-  'test files that exercise the changed behavior',
+  'search identifiers: function, class, and variable names involved in the change, and their call sites',
+  'search string literals, log messages, error messages, comments, and docs',
+  'search types, interfaces, schemas, config files, and dependency manifests',
+  'search test files — treat tests as the executable specification of behavior',
 ]
 const discoveries = (await parallel(MODES.map((how, i) => () =>
   run(
@@ -81,7 +84,7 @@ const results = await pipeline(
   ).then(c => ({ file: f, ...(c || { ok: false, problems: 'checker did not complete' }) }))
 )
 
-const bad = results.filter(Boolean).filter(r => !r.ok)
+const bad = results.filter(r => r && !r.ok)
 if (bad.length) log(bad.length + ' file(s) failed their per-file check — see perFileProblems')
 
 phase('Final verify')

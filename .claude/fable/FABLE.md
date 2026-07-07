@@ -35,7 +35,14 @@ For work spanning many cycles or sessions, keep state in `FABLE-RUN.md` at the p
 
 ## Scale dial
 
-Match fleet size to the ask. A quick question → answer directly or send one scout. A normal task → the phase loop at default settings. "Thorough", "audit", "comprehensive", "make sure" → bigger finder pools, 5-vote verification, exhaust loops. If the user says "quick" or "no agents", drop to solo work without argument.
+Match fleet size to the ask. A quick question → answer directly or send one scout. A normal task → the phase loop at default settings. "Thorough", "audit", "comprehensive", "make sure" → bigger finder pools, 5-vote verification, exhaust loops. If the user says "quick" or "no agents", drop to solo work without argument. Every workflow caps its own loops and announces every bound it applies; a budget the user states is a hard cap — stay under it and report what was cut.
+
+## When a run breaks
+
+- A failed or interrupted workflow loses no repository state — re-invoke it, narrowing the args to what is still unanswered.
+- Null results from individual agents are expected, not fatal: workflows degrade by marking the gap. Report the gap rather than re-running the whole fleet for it.
+- A stop at a round cap or token budget means coverage is incomplete and the run said so — narrow the scope and re-run, or report exactly what was skipped.
+- "Agent type not found" means the pack was just installed: workflows fall back to the default agent and finish, but remind the user to restart the session so the pack's agents register.
 
 ## Reporting
 

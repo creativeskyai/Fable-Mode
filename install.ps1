@@ -1,32 +1,54 @@
 # Installs the Fable-Mode pack into a target project's .claude directory
 # and wires the doctrine into its CLAUDE.md via an @import line.
 #
-# Usage:  .\install.ps1 -Target C:\path\to\project [-Force]
+# Usage:  .\install.ps1 -Target C:\path\to\project [-Update]
+#   -Update   overwrite pack-owned files with this version (never touches
+#             files the pack does not ship); -Force is a deprecated alias
 param(
-    [Parameter(Mandatory = $true)][string]$Target,
+    [Parameter(Mandatory = $true, Position = 0)][string]$Target,
+    [switch]$Update,
     [switch]$Force
 )
+
+if ($Force -and -not $Update) { Write-Warning '-Force is deprecated; use -Update'; $Update = $true }
 
 $src = Join-Path $PSScriptRoot '.claude'
 if (-not (Test-Path -LiteralPath $src)) { throw "Pack .claude directory not found next to install.ps1 ($src)" }
 if (-not (Test-Path -LiteralPath $Target -PathType Container)) { throw "Target is not an existing directory: $Target" }
 
 $dest = Join-Path $Target '.claude'
-New-Item -ItemType Directory -Force $dest | Out-Null
+
+$readVersion = {
+    param($path)
+    if (Test-Path -LiteralPath $path) {
+        $line = Get-Content -LiteralPath $path -TotalCount 1
+        if ($line) { $line.Trim() }
+    }
+}
+$packVersion = (& $readVersion (Join-Path $src 'fable\VERSION'))
+if (-not $packVersion) { $packVersion = 'unknown' }
+if ($Update) {
+    $oldVersion = (& $readVersion (Join-Path $dest 'fable\VERSION'))
+    if (-not $oldVersion) { $oldVersion = 'unversioned pre-1.0 install' }
+    Write-Host "updating Fable-Mode $oldVersion -> $packVersion in $Target"
+}
+else {
+    Write-Host "installing Fable-Mode v$packVersion into $Target"
+}
 
 $copied = 0
 $skipped = 0
-Get-ChildItem -Path $src -Recurse -File | ForEach-Object {
-    $rel = $_.FullName.Substring($src.Length).TrimStart('\', '/')
+foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
+    $rel = $f.FullName.Substring($src.Length).TrimStart('\', '/')
     $out = Join-Path $dest $rel
-    if ((Test-Path -LiteralPath $out) -and -not $Force) {
+    if ((Test-Path -LiteralPath $out) -and -not $Update) {
         Write-Host "skip (exists): .claude\$rel"
-        $script:skipped++
-        return
+        $skipped++
+        continue
     }
     New-Item -ItemType Directory -Force (Split-Path $out) | Out-Null
-    Copy-Item -LiteralPath $_.FullName -Destination $out -Force
-    $script:copied++
+    Copy-Item -LiteralPath $f.FullName -Destination $out -Force
+    $copied++
 }
 
 $claudeMd = Join-Path $Target 'CLAUDE.md'
@@ -43,5 +65,6 @@ else {
     Write-Host 'CLAUDE.md already imports Fable Mode'
 }
 
-Write-Host "done: $copied file(s) copied, $skipped skipped (use -Force to overwrite existing files)"
+Write-Host "done: $copied file(s) copied, $skipped skipped"
+if ($skipped -gt 0 -and -not $Update) { Write-Host "run with -Update to refresh pack files to v$packVersion" }
 Write-Host 'restart any open Claude Code session in the target project - agent types register at session start'

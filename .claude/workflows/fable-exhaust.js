@@ -42,9 +42,9 @@ const BUGS = {
 
 const VERDICT = {
   type: 'object',
-  required: ['real', 'reasoning'],
+  required: ['refuted', 'reasoning'],
   properties: {
-    real: { type: 'boolean' },
+    refuted: { type: 'boolean', description: 'true if the finding is wrong, cannot occur, or is intended behavior' },
     reasoning: { type: 'string', description: 'the decisive evidence, with path:line citations' },
   },
 }
@@ -55,6 +55,9 @@ const LENSES = [
   'impact: is the consequence as claimed, or benign in context (intended behavior, dead code, test-only path)?',
 ]
 
+// Must stay single-line — the drift checker compares this line byte-for-byte across workflows.
+const CONTRAST = 'First state the strongest concrete case that the claim is REAL, then the strongest case that it is NOT, then decide: set refuted=true only if the against-case wins under your lens, citing the decisive evidence.'
+
 const STANCES = [
   'read the least-tested code first — anything without test coverage',
   'trace data from every external input to the point where it is trusted',
@@ -64,6 +67,9 @@ const STANCES = [
 
 const key = b => b.file + ':' + b.line + ':' + b.title.toLowerCase().slice(0, 60)
 const seen = new Set()
+// Locations only (no titles) — this set is re-broadcast to every finder each round,
+// so it must stay small; the finders need "don't re-report here", not the details.
+const seenLocs = new Set()
 const confirmed = []
 const MAX_ROUNDS = 6
 let round = 0
@@ -74,7 +80,7 @@ while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 4
   const found = (await parallel(STANCES.map((stance, i) => () =>
     run(
       'Hunt for ' + hunt + ' in ' + scope + '. Round ' + round + '. Your stance: ' + stance + '.' +
-      (seen.size ? '\nAlready found — do NOT re-report these: ' + Array.from(seen).slice(-80).join('; ') : ''),
+      (seenLocs.size ? '\nAlready found — do NOT re-report findings at these locations: ' + Array.from(seenLocs).slice(-200).join('; ') : ''),
       { label: 'find:r' + round + 's' + (i + 1), phase: 'Find', schema: BUGS, agentType: 'fable-finder' }
     )
   ))).filter(Boolean).flatMap(r => r.findings || [])
@@ -86,17 +92,17 @@ while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 4
     continue
   }
   dry = 0
-  fresh.forEach(b => seen.add(key(b)))
+  fresh.forEach(b => { seen.add(key(b)); seenLocs.add(b.file + ':' + b.line) })
 
   const judged = await parallel(fresh.map(b => () =>
     parallel(LENSES.map(lens => () =>
       run(
         'Claimed finding in ' + b.file + ':' + b.line + ' — "' + b.title + '". Scenario: ' + b.detail + '\n' +
         'Judge it through ONE lens only — ' + lens + '\n' +
-        'Set real=true only if the claim holds under your lens.',
+        CONTRAST,
         { label: 'verify:' + b.file + ':' + b.line, phase: 'Verify', schema: VERDICT, agentType: 'fable-skeptic' }
       )))
-      .then(vs => ({ b, real: vs.filter(Boolean).filter(v => v.real).length >= 2 }))
+      .then(vs => ({ b, real: vs.filter(v => v && v.refuted === false).length >= 2 }))
   ))
   const kept = judged.filter(j => j.real).map(j => j.b)
   confirmed.push(...kept)
