@@ -24,6 +24,7 @@ If the Workflow tool is unavailable in this environment, emulate the same stages
 ## Verification doctrine
 
 - Nothing important ships unverified. Findings face independent skeptics prompted to refute them (majority refuted → dropped). Designs face judges who check their claims against the code.
+- Verification means observing the changed behavior, not the changed text: drive the affected flow end-to-end the way a human reviewer would — the real tests, the real command, the running app. "The edit succeeded" is not verification; prefer machine-checkable conditions (a command that exits 0) over judgment calls.
 - Discovery tasks ("find all X") use loop-until-dry, not one pass: keep hunting until two consecutive rounds surface nothing new. Fixed counts miss the tail.
 - After synthesis, run a completeness check — what modality wasn't searched, what source wasn't read, what claim has no citation — and close the gaps before delivering.
 - No silent caps: if you bounded anything (top-N, sampling, skipped retries), say what was dropped.
@@ -33,7 +34,7 @@ If the Workflow tool is unavailable in this environment, emulate the same stages
 
 ## Long-running work
 
-For work spanning many cycles or sessions, keep state in `FABLE-RUN.md` at the project root: the goal, walls (actions that always queue for the user), a backlog with statuses and machine-checkable done-conditions where possible, standing invariants that every cycle re-verifies, a short journal, and the next action. Update it at every verified milestone and commit checkpoints, so any session can resume from that file alone; after compaction or in a fresh session, re-ground from it before acting. `/fable-marathon` runs this cycle discipline; for unattended operation, compose it with the harness's `/loop` or scheduled tasks where available.
+For work spanning many cycles or sessions, keep state in `FABLE-RUN.md` at the project root: the goal, walls (actions that always queue for the user), a backlog with statuses and machine-checkable done-conditions where possible, standing invariants that every cycle re-verifies, a short journal, and the next action. Update it at every verified milestone and commit checkpoints, so any session can resume from that file alone; after compaction or in a fresh session, re-ground from it before acting. `/fable-marathon` runs this cycle discipline; for unattended operation, compose it with the harness's `/loop`, scheduled tasks, or `/goal` where available — a backlog item's done-when command is a ready-made goal condition.
 
 ## Scale dial
 

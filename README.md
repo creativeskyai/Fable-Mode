@@ -134,7 +134,7 @@ For unattended operation, compose it with whatever loop mechanism your Claude Co
 /loop 30m /fable-marathon    # fixed interval
 ```
 
-or point a scheduled task / cron-style routine at the same command. Marathon stops cycling on its own only for things that are genuinely the user's: an empty backlog, input only they can provide, or a destructive/deploy action (which it gates behind `/fable-ship` and hands to you).
+or point a scheduled task / cron-style routine at the same command. Where your Claude Code has `/goal`, a backlog item's `done-when:` command doubles as the goal condition for a single unattended item. Marathon stops cycling on its own only for things that are genuinely the user's: an empty backlog, input only they can provide, or a destructive/deploy action (which it gates behind `/fable-ship` and hands to you).
 
 ## How it maps to Fable 5 Ultracode
 

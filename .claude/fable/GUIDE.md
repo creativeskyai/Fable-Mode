@@ -77,6 +77,12 @@ deploy-shaped. Your job is the run file, `FABLE-RUN.md` at the project root:
 
 For unattended runs: `/loop /fable-marathon` (self-paced) or `/loop 30m /fable-marathon`.
 
+**Loop types, mapped:** a plain prompt is one agentic turn (the doctrine handles it);
+work with a verifiable finish line is a marathon backlog item with a `done-when:`
+command — or the harness's `/goal` for a single task; recurring or time-driven work
+is `/loop` or a scheduled task wrapped around `/fable-marathon`. The pack supplies
+the process; the harness supplies the trigger.
+
 ## Scale and cost dial
 
 Words in your request are the dial: "quick" or "no agents" → solo work; nothing

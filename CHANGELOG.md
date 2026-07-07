@@ -2,6 +2,14 @@
 
 The first `## ` heading below must match `.claude/fable/VERSION` — `tools/check-workflows.cjs` enforces it. If a release ever removes a shipped file, list the stale path here so updaters can delete it manually.
 
+## 1.3.0 — 2026-07-07
+
+Adoptions judged in from Anthropic's loop-design guidance (most of it the pack already had — `/goal`-style stop conditions are marathon done-whens, "encode the fix into the system" is the Proposals mechanism; what follows is the delta).
+
+- `fable-migrate` pilots before fanning out: with 4+ discovered files, two representative files are transformed and checked first; if the pilot fails, the fan-out is aborted (`pilotFailed` in the result) and the remaining files are never touched — a bad instruction now fails at two files' cost, not the fleet's. Below 4 files the pilot is skipped, announced.
+- Verification doctrine: verify by observing changed behavior end-to-end (real tests, real command, running app), never by edit success; prefer machine-checkable conditions. Marathon's execute step prefers end-to-end checks the same way.
+- Loop composition documented: FABLE.md, README, and GUIDE.md name `/goal` alongside `/loop` and scheduled tasks — a backlog item's done-when command is a ready-made goal condition; GUIDE.md maps the loop types to pack pieces.
+
 ## 1.2.0 — 2026-07-07
 
 Project-facts seam: workflows and agents now treat a target project's own operating docs as authoritative over re-detection. Design chosen by a judge panel (a prompt-level reading convention scored 9/10 against a FABLE-PROJECT.md contract file and a checker-enforced resolver stage — no new files, no parser, byte-identical behavior for targets that document nothing).
