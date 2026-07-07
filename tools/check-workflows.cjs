@@ -109,7 +109,7 @@ for (const [f, needles] of Object.entries(REQUIRED_TWINS)) {
 // --- docs + doctrine reference checks ---
 const known = new Set([...agentNames, ...workflowNames, ...skillNames]);
 const fablePath = path.join(root, '.claude', 'fable', 'FABLE.md');
-const docs = [fablePath, path.join(root, 'README.md'), path.join(root, 'CLAUDE.md')];
+const docs = [fablePath, path.join(root, '.claude', 'fable', 'GUIDE.md'), path.join(root, 'README.md'), path.join(root, 'CLAUDE.md')];
 for (const s of skillNames) docs.push(path.join(root, '.claude', 'skills', s, 'SKILL.md'));
 for (const d of docs) {
   if (!fs.existsSync(d)) { bad(path.relative(root, d), 'missing file'); continue; }

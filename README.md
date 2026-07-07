@@ -10,6 +10,7 @@ Prompts can't change model weights — what this pack ports is the **process**, 
 .claude/
 ├── fable/
 │   ├── FABLE.md            # the always-on operating doctrine (imported into CLAUDE.md)
+│   ├── GUIDE.md            # one-page user guide: what to run, when (for you — never loaded into context)
 │   └── VERSION             # pack version stamp (printed by the installers)
 ├── agents/                 # the subagent fleet the workflows are built from
 │   ├── fable-scout.md      #   read & map (read-only)
@@ -98,6 +99,8 @@ rm -f .claude/agents/fable-*.md .claude/workflows/fable-*.js
 ```
 
 ## Usage
+
+A one-page routing guide — which command to run when, how they differ, and what `/fable-marathon` runs on its own — ships with the pack as [.claude/fable/GUIDE.md](.claude/fable/GUIDE.md), so it's also present in every project you install into.
 
 With the doctrine wired into `CLAUDE.md`, no commands are needed — the model treats every substantive task as an Ultracode task: it maps before designing, panels wide decisions, reviews its own diffs with skeptics, and reports what it didn't cover. The skills are for invoking specific machinery directly (bracketed arguments are optional and have sensible defaults):
 
