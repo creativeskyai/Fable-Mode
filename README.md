@@ -116,7 +116,9 @@ With the doctrine wired into `CLAUDE.md`, no commands are needed — the model t
 
 ## Continuous operation
 
-`/fable-marathon` is built for long runs. It keeps all state in `FABLE-RUN.md` at the project root (goal, backlog with statuses, journal, next action — created automatically), executes one backlog item per cycle through the full phase discipline, and commits at verified milestones — so every cycle is resumable from the file alone, across sessions, compactions, or machines. It expects a git repository (checkpoint commits are its safety rail): on a non-git project it offers `git init` once; declining disables rollback, not the run.
+`/fable-marathon` is built for long runs. It keeps all state in `FABLE-RUN.md` at the project root (goal, walls, backlog with statuses and machine-checkable done-when commands, standing invariants, journal, next action — created automatically), executes one backlog item per cycle through the full phase discipline, and commits at verified milestones — so every cycle is resumable from the file alone, across sessions, compactions, or machines. It expects a git repository (checkpoint commits are its safety rail): on a non-git project it offers `git init` once; declining disables rollback, not the run.
+
+Three disciplines keep unattended runs honest: **Walls** (a per-run list of actions that always queue for the user — secrets, payments, anything destructive or externally visible — written into the run file so it survives compaction), **Invariants** (finished items graduate into cheap, re-runnable check commands that every cycle re-verifies, so nothing that passed once rots silently), and a **standoff rule** (when implementation and verification disagree twice, the item is blocked for the user instead of burning tokens all night). At natural stopping points the run also sweeps its own failures and proposes up to three new Walls or Invariants — proposals only, never self-applied.
 
 For unattended operation, compose it with whatever loop mechanism your Claude Code version provides:
 
@@ -148,6 +150,7 @@ or point a scheduled task / cron-style routine at the same command. Marathon sto
 
 - **Per-agent models** — every agent ships with `model: inherit`. The intended tuning lever is pinning models in agent frontmatter (e.g. `model: haiku` in `fable-scout.md`), **but that field is currently ignored by Claude Code** ([anthropics/claude-code#44385](https://github.com/anthropics/claude-code/issues/44385)) — subagents inherit the session model regardless. Until that's fixed, the working alternative is passing `model` in direct Agent-tool calls; the shipped files deliberately stay on `inherit` either way.
 - **Verification strictness** — `votes` in the review workflow (3 default, 5 for audits); the dry-round threshold and `MAX_ROUNDS` in `fable-exhaust.js`.
+- **Per-stage effort** — workflow agents inherit the session's reasoning effort; the Workflow tool accepts a per-agent `effort` override (`'low'`…`'max'`, verified working in the current harness). The discipline: spend effort where the loop branches — skeptics and judges — and keep mechanical stages at the default; raising every stage at once buys cost, not quality. The shipped workflows deliberately set no effort overrides.
 - **Doctrine** — `FABLE.md` is plain markdown; edit the scale dial or reporting rules to taste. It's loaded into every session, so keep it lean.
 
 ### Cost control

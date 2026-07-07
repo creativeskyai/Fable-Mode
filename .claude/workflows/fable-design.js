@@ -38,11 +38,11 @@ const SCORES = {
       type: 'array',
       items: {
         type: 'object',
-        required: ['approach', 'score', 'reasoning'],
+        required: ['approach', 'score', 'evidence'],
         properties: {
           approach: { type: 'integer', description: 'index of the approach being scored' },
           score: { type: 'integer', description: '1 to 10, using the full range' },
-          reasoning: { type: 'string' },
+          evidence: { type: 'string', description: 'what in the code or design grounds this score' },
         },
       },
     },

@@ -42,10 +42,10 @@ const BUGS = {
 
 const VERDICT = {
   type: 'object',
-  required: ['refuted', 'reasoning'],
+  required: ['refuted', 'evidence'],
   properties: {
     refuted: { type: 'boolean', description: 'true if the finding is wrong, cannot occur, or is intended behavior' },
-    reasoning: { type: 'string', description: 'the decisive evidence, with path:line citations' },
+    evidence: { type: 'string', description: 'the decisive evidence, with path:line citations' },
   },
 }
 

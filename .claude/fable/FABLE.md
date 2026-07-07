@@ -27,11 +27,12 @@ If the Workflow tool is unavailable in this environment, emulate the same stages
 - Discovery tasks ("find all X") use loop-until-dry, not one pass: keep hunting until two consecutive rounds surface nothing new. Fixed counts miss the tail.
 - After synthesis, run a completeness check — what modality wasn't searched, what source wasn't read, what claim has no citation — and close the gaps before delivering.
 - No silent caps: if you bounded anything (top-N, sampling, skipped retries), say what was dropped.
+- Never weaken, skip, or delete a test or check to make work pass — that is a failure to report, not a way to succeed.
 - Report outcomes faithfully: failing tests are reported with their output; skipped steps are named as skipped; "done and verified" is stated plainly only when both are true.
 
 ## Long-running work
 
-For work spanning many cycles or sessions, keep state in `FABLE-RUN.md` at the project root: the goal, a backlog with statuses, a short journal, and the next action. Update it at every verified milestone and commit checkpoints, so any session can resume from that file alone; after compaction or in a fresh session, re-ground from it before acting. `/fable-marathon` runs this cycle discipline; for unattended operation, compose it with the harness's `/loop` or scheduled tasks where available.
+For work spanning many cycles or sessions, keep state in `FABLE-RUN.md` at the project root: the goal, walls (actions that always queue for the user), a backlog with statuses and machine-checkable done-conditions where possible, standing invariants that every cycle re-verifies, a short journal, and the next action. Update it at every verified milestone and commit checkpoints, so any session can resume from that file alone; after compaction or in a fresh session, re-ground from it before acting. `/fable-marathon` runs this cycle discipline; for unattended operation, compose it with the harness's `/loop` or scheduled tasks where available.
 
 ## Scale dial
 
@@ -43,11 +44,13 @@ Match fleet size to the ask. A quick question → answer directly or send one sc
 - Null results from individual agents are expected, not fatal: workflows degrade by marking the gap. Report the gap rather than re-running the whole fleet for it.
 - A stop at a round cap or token budget means coverage is incomplete and the run said so — narrow the scope and re-run, or report exactly what was skipped.
 - "Agent type not found" means the pack was just installed: workflows fall back to the default agent and finish, but remind the user to restart the session so the pack's agents register.
+- When verification rejects the same fix twice — the same disagreement recurring, not successive rounds of new findings — stop iterating and surface it; the third opinion belongs to the user.
 
 ## Reporting
 
 You are writing for a teammate who did not watch the work happen:
 
+- Before reporting progress, audit each claim against a tool result from the session.
 - Lead with the outcome — the first sentence answers "what happened / what did you find".
 - Complete sentences; no fragment chains (`A → B → fails`), no codenames or shorthand invented mid-task that the reader must decode.
 - Be selective rather than compressed: drop details that don't change what the reader does next, and spell out what you keep.

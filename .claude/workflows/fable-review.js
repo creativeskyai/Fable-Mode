@@ -45,15 +45,15 @@ const FINDINGS = {
 
 const VERDICT = {
   type: 'object',
-  required: ['refuted', 'reasoning'],
+  required: ['refuted', 'evidence'],
   properties: {
     refuted: { type: 'boolean', description: 'true if the finding is wrong, cannot occur, or is intended behavior' },
-    reasoning: { type: 'string', description: 'the decisive evidence, with path:line citations' },
+    evidence: { type: 'string', description: 'the decisive evidence, with path:line citations' },
   },
 }
 
 const DIMENSIONS = [
-  { key: 'correctness', focus: 'logic bugs: wrong conditionals, off-by-one, inverted checks, broken state transitions, unhandled edge cases (empty, null, zero, unicode, concurrent access)' },
+  { key: 'correctness', focus: 'logic bugs: wrong conditionals, off-by-one, inverted checks, broken state transitions, unhandled edge cases (empty, null, zero, unicode, concurrent access); any edit that weakens, skips, or deletes a test so the change passes (always critical)' },
   { key: 'contracts', focus: 'breakage at the boundaries of the change: callers of changed functions, changed types/signatures, API and serialization compatibility, migrations, config' },
   { key: 'security', focus: 'injection, authz/authn gaps, secrets in code, unsafe deserialization, path traversal, SSRF, XSS, race conditions with security impact' },
   { key: 'resources', focus: 'performance and resource handling: leaks, unbounded growth, N+1 queries, missing timeouts or cancellation, blocking calls on hot paths' },
