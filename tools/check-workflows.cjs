@@ -119,6 +119,19 @@ for (const d of docs) {
   }
 }
 
+// The decision-log convention is hand-copied prose across agent files, docs, and the
+// doctrine — same discipline as TWINS: every mention must use the one canonical phrase,
+// or the copies drift apart file by file.
+const DECISION_PHRASE = 'DECISIONS.md or docs/DECISIONS.md';
+const prose = [...docs];
+for (const f of fs.readdirSync(path.join(root, '.claude', 'agents')).filter(f => f.endsWith('.md'))) prose.push(path.join(root, '.claude', 'agents', f));
+for (const p of prose) {
+  if (!fs.existsSync(p)) continue;
+  // backticks are styling, not wording — `DECISIONS.md` or `docs/DECISIONS.md` is the same phrase
+  const residue = fs.readFileSync(p, 'utf8').replace(/`/g, '').split(DECISION_PHRASE).join('');
+  if (residue.includes('DECISIONS.md')) bad(path.relative(root, p), "mentions a decision log without the canonical phrase '" + DECISION_PHRASE + "' — the hand-copied convention has drifted");
+}
+
 // reverse direction: the doctrine must mention every workflow and agent that ships,
 // or a target project's model never learns they exist.
 if (fs.existsSync(fablePath)) {

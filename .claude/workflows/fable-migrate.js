@@ -13,7 +13,8 @@ export const meta = {
 const input = typeof args === 'string' ? { instruction: args } : (args || {})
 if (!input.instruction) throw new Error('fable-migrate requires args: { instruction: "..." }')
 const verifyCmd = input.verify ||
-  "the project's standard build and test commands (detect them from the repo: package.json scripts, Makefile, CI config)"
+  "the project's documented build and test commands (read the root CLAUDE.md and its @path imports and AGENTS.md first; " +
+  "detect from package.json scripts, Makefile, or CI config only if the docs name none)"
 
 // Falls back to the default agent when the pack's agents aren't registered yet
 // (agent types load at session start — a fresh install needs a restart).

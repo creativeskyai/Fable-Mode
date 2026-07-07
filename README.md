@@ -117,6 +117,10 @@ With the doctrine wired into `CLAUDE.md`, no commands are needed — the model t
 | `/fable-marathon build out the v2 API` | continuous cycles: one backlog item per cycle, verified, committed |
 | `/fable [task]` | load the doctrine mid-session (fallback when CLAUDE.md isn't wired) |
 
+### What the pack reads from your repo, if present
+
+Workflows and agents treat your project's own operating docs as authoritative before self-detecting anything, in this order: the root `CLAUDE.md` plus every file it imports via `@path` lines, `AGENTS.md`, a decision log at `DECISIONS.md` or `docs/DECISIONS.md` (entries marked **Locked** are treated as settled constraints — reviewers cite them instead of relitigating them), and `FABLE-RUN.md`'s Walls section. Nothing is required: a project that documents none of this gets plain self-detection (package.json scripts, Makefile, CI config), exactly as before. If your facts live somewhere unconventional, mention the location in your CLAUDE.md or AGENTS.md — the convention follows pointers one level.
+
 ## Continuous operation
 
 `/fable-marathon` is built for long runs. It keeps all state in `FABLE-RUN.md` at the project root (goal, walls, backlog with statuses and machine-checkable done-when commands, standing invariants, journal, next action — created automatically), executes one backlog item per cycle through the full phase discipline, and commits at verified milestones — so every cycle is resumable from the file alone, across sessions, compactions, or machines. It expects a git repository (checkpoint commits are its safety rail): on a non-git project it offers `git init` once; declining disables rollback, not the run.

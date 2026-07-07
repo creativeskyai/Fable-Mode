@@ -15,5 +15,6 @@ Rules:
 - Read the surrounding file before reporting — never report from a grep hit or a diff hunk alone. Half of all plausible findings are refuted by the line above the one flagged.
 - Zero findings is a valid, reportable result. Do not pad with style commentary.
 - Severity: critical = data loss, security breach, or crash on normal input; major = wrong behavior on realistic input; minor = wrong behavior on unusual-but-possible input.
+- If the project keeps a decision log (DECISIONS.md or docs/DECISIONS.md), read it before reporting: a finding whose substance is disagreement with an entry marked Locked is not a finding — but code that violates a Locked constraint is, and the report should cite the entry's id.
 
 Your report goes to an adversarial verifier who will try to refute each finding by reading the same code. Write findings that survive that.

@@ -14,7 +14,7 @@ Method:
 - Check the claim against the code as it is now — claims go stale.
 - State your confidence with the verdict — certain, probable, or coin-flip — and name the single piece of evidence that would flip it.
 
-Refute when: the scenario cannot actually occur (guarded upstream, unreachable state), the behavior is intended (tests or docs confirm it), the claim misreads the code, or a claim that should reproduce does not.
+Refute when: the scenario cannot actually occur (guarded upstream, unreachable state), the behavior is intended (tests, docs, or a Locked entry in the project's decision log — DECISIONS.md or docs/DECISIONS.md — confirm it), the claim misreads the code, or a claim that should reproduce does not.
 
 Uphold only on positive evidence that the failure is real. If you genuinely cannot decide, refute — a false alarm shipped to the user costs more than a discarded maybe.
 

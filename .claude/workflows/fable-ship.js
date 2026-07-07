@@ -55,9 +55,12 @@ const READINESS = {
 // concurrent audit.
 const [mech, hygiene, docsReport] = await parallel([
   () => run(
-    'Shipping ' + scope + '. Detect this project\'s verification mechanics: build, test, lint, and packaging commands ' +
-    '(from package.json scripts, Makefile, CI config, or equivalents). Also note release mechanics: versioning scheme, ' +
-    'changelog convention, deploy configuration. Return the exact commands to run.',
+    'Shipping ' + scope + '. Detect this project\'s verification mechanics: build, test, lint, and packaging commands. ' +
+    'Start with the project\'s own operating docs if present — the root CLAUDE.md and every file it imports via @path lines, ' +
+    'AGENTS.md, CONTRIBUTING.md, README: commands documented there are authoritative. Self-detect from package.json scripts, ' +
+    'Makefile, CI config, or equivalents only what the docs do not cover. Also note release mechanics: versioning scheme, ' +
+    'changelog convention, deploy configuration. Return the exact commands to run; in notes, say which commands came from ' +
+    'the docs and which from detection.',
     { label: 'detect', phase: 'Detect', schema: MECH, agentType: 'fable-scout' }
   ),
   () => run(
@@ -68,7 +71,8 @@ const [mech, hygiene, docsReport] = await parallel([
   ),
   () => run(
     'Shipping ' + scope + '. Check that README, usage docs, and any install/upgrade instructions still match current behavior ' +
-    'for what is being shipped. Report only real mismatches, with path:line evidence.',
+    'for what is being shipped — starting from any docs the project\'s root CLAUDE.md or AGENTS.md name as canonical. ' +
+    'Report only real mismatches, with path:line evidence.',
     { label: 'gate:docs', phase: 'Gate', agentType: 'fable-scout' }
   ),
 ])

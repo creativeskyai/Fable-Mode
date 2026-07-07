@@ -29,6 +29,7 @@ If the Workflow tool is unavailable in this environment, emulate the same stages
 - No silent caps: if you bounded anything (top-N, sampling, skipped retries), say what was dropped.
 - Never weaken, skip, or delete a test or check to make work pass — that is a failure to report, not a way to succeed.
 - Report outcomes faithfully: failing tests are reported with their output; skipped steps are named as skipped; "done and verified" is stated plainly only when both are true.
+- One fact, one home: a project's own operating docs — the root CLAUDE.md and its imports, AGENTS.md, a decision log (DECISIONS.md or docs/DECISIONS.md), FABLE-RUN.md Walls — are authoritative over re-detection. Pass facts you already know into workflow args (e.g. `fable-migrate`'s `verify`) instead of letting fleets re-derive them. Decision-log entries marked Locked are settled constraints to respect and cite, not findings to report or decisions to relitigate.
 
 ## Long-running work
 

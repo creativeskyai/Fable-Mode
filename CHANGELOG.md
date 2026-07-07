@@ -2,6 +2,17 @@
 
 The first `## ` heading below must match `.claude/fable/VERSION` — `tools/check-workflows.cjs` enforces it. If a release ever removes a shipped file, list the stale path here so updaters can delete it manually.
 
+## 1.2.0 — 2026-07-07
+
+Project-facts seam: workflows and agents now treat a target project's own operating docs as authoritative over re-detection. Design chosen by a judge panel (a prompt-level reading convention scored 9/10 against a FABLE-PROJECT.md contract file and a checker-enforced resolver stage — no new files, no parser, byte-identical behavior for targets that document nothing).
+
+- `fable-ship` detection and docs gates, and `fable-migrate`'s verify fallback, read the target's root CLAUDE.md (plus its `@path` imports), AGENTS.md, CONTRIBUTING.md, and README before self-detecting from package.json/Makefile/CI; detection provenance is reported in the mech notes.
+- Decision-log respect in the three judgment agents: finders don't report disagreement with Locked entries (but do report code violating them, citing the id); skeptics may refute findings that relitigate Locked decisions; judges score contradicting a Locked entry like misreading the code.
+- `fable-builder` treats actions the project's docs or FABLE-RUN.md Walls mark always-queue-for-user as blocked; marathon seeds Walls from the project's own docs.
+- FABLE.md gains a one-fact-one-home doctrine bullet: forward known facts via workflow args instead of letting fleets re-derive them.
+- New one-page user guide ships in the pack (`.claude/fable/GUIDE.md`): what to run when, look-alike disambiguation, what marathon runs automatically, cost dial. Never loaded into context.
+- Wiring checker: GUIDE.md added to the reference scan; new drift guard requires every decision-log mention across agents/docs to use the one canonical phrase.
+
 ## 1.1.0 — 2026-07-07
 
 Unattended-run hardening, judged in from an external autonomous-loop field guide (each adoption vetted by a three-lens judge panel; the guide's shell infrastructure — cron loops, trust ledgers, cost scripts, model dispatch — was rejected as redundant with the Workflow tool and harness `/loop`).

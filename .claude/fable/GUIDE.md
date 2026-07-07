@@ -12,6 +12,12 @@ wide decisions, reviews its own diffs with skeptics, and gates releases. Ask for
 in plain language. The slash commands below are for when you want specific machinery,
 a specific scale, or a run the doctrine wouldn't start by itself (marathon).
 
+**What the pack reads from your repo:** workflows treat your project's own docs as
+authoritative before self-detecting — the root CLAUDE.md and its `@path` imports,
+AGENTS.md, a decision log (DECISIONS.md or docs/DECISIONS.md, where entries marked
+Locked are settled constraints), and FABLE-RUN.md's Walls. Document your commands
+and rules once, in your own files, and every fleet uses them.
+
 ## Ad-hoc: pick by the question you're asking
 
 In lifecycle order — the order you'd use them building a feature from scratch:
