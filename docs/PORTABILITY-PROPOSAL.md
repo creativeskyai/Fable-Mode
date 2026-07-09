@@ -1,10 +1,10 @@
 # Proposal: Running Fable Mode Outside Claude Code (Cursor, Local DGX Spark, Grok Heavy)
 
-> **STATUS: DRAFT — NOT YET VETTED.** This document was researched and drafted by Opus 4.8 after the
-> Fable 5 session hit its monthly spend limit mid-research. It **must be reviewed by Fable 5** for
-> accuracy and improvements before any of it is acted on. Web research was conducted in July 2026;
-> several sources were AI-generated content farms of low reliability. **Facts flagged with ⚠ below are
-> the least certain and need primary-source re-verification.** Nothing here has been implemented.
+> **STATUS: DRAFT — RESEARCH NOT YET VERIFIED.** This is an exploratory roadmap, not a commitment.
+> Web research was conducted in July 2026 and some of it rests on low-quality secondary sources;
+> **facts flagged with ⚠ below are the least certain and need primary-source re-verification before
+> anyone acts on them.** Nothing here has been implemented. Corrections and firsthand reports are
+> welcome as issues or PRs.
 
 ## Question this answers
 
@@ -15,7 +15,7 @@ Spark** with open-weight models, or against **Grok Heavy** — and how would we 
 
 ## The core reframe
 
-Fable Mode is four layers (see [CLAUDE.md](CLAUDE.md) "Architecture: four layers wired by name"). They
+Fable Mode is four layers (see [CLAUDE.md](../CLAUDE.md) "Architecture: four layers wired by name"). They
 port with very different ease:
 
 | Layer | Portability | Why |
@@ -56,7 +56,7 @@ FABLE.md into an `.mdc`/`AGENTS.md` and adjusts the idempotence check gets there
 ⚠ **To re-verify:** the four `.mdc` activation modes and exact frontmatter fields; that `.claude/agents/`
 and `.claude/skills/` are still auto-discovered; whether `tools:` is truly ignored; current Cursor version
 and feature names (`/multitask`, `/worktree`, `/best-of-n`, `/in-cloud` — version numbers came from
-content-farm sources and were **not** all confirmed against the official changelog).
+low-quality secondary sources and were **not** all confirmed against the official changelog).
 
 ---
 
@@ -70,8 +70,9 @@ format, so a translation proxy is required: **claude-code-router** (simplest) or
 Set `ANTHROPIC_BASE_URL` to the proxy + a dummy `ANTHROPIC_AUTH_TOKEN`. **Win:** the Workflow tool,
 subagents, and skills all keep working — only the reasoning model changes. **Caveat:** multi-agent fan-out
 and structured-output schemas depend on tool-calling fidelity, which open-weight models do less reliably
-than Claude. ⚠ **Security:** LiteLLM 1.82.7/1.82.8 reportedly shipped credential-stealing malware — pin a
-known-good version and verify before install.
+than Claude. **Supply-chain hygiene:** whichever proxy you choose, install a pinned, checksummed release
+from the official source and review its changelog/advisories before giving it credentials — proxies sit
+on the path that carries your API keys.
 
 **Path B — Use a local-native harness.** OpenCode (75+ endpoints incl. local Ollama / OpenAI-compatible,
 reads `AGENTS.md`) or Goose (Block; subagents, recipes, MCP; reads `AGENTS.md`). Run the portable core
@@ -100,8 +101,8 @@ test, not just docs).
 ⚠ **Key finding, needs primary re-verification:** xAI's current API docs appear to list a
 `grok-4.20-...-multi-agent` chat model alongside the flagship `grok-4.3` (1M context), at the same pricing
 as regular chat models — meaning the parallel-agent "Heavy" behavior may now be **API-reachable**, not
-consumer-only as it was at launch (SuperGrok Heavy, $300/mo, grok.com). Exact model IDs churn and the Grok
-search ecosystem is heavily content-farm-polluted; trust only `docs.x.ai` at call time.
+consumer-only as it was at launch (SuperGrok Heavy, $300/mo, grok.com). Exact model IDs churn and
+secondary coverage is unreliable; trust only `docs.x.ai` at call time.
 
 **How to drive it.**
 - xAI API is **OpenAI-compatible** at `https://api.x.ai/v1`. Anthropic-SDK compatibility was offered once
@@ -139,12 +140,12 @@ Claude-Code-only luxury.**
    caps exist only under the Workflow tool; elsewhere they are LLM-followed prose (verify more, trust less).
 
 Validation for any of these: existing `tools/check-workflows.cjs` (for naming/wiring) plus an installer
-smoke-test (idempotent, skips existing files, no duplicate import line) per [CLAUDE.md](CLAUDE.md)
+smoke-test (idempotent, skips existing files, no duplicate import line) per [CLAUDE.md](../CLAUDE.md)
 "Validation commands".
 
 ---
 
-## What Fable 5's vetting pass should focus on
+## Open review questions
 
 1. **Re-verify every ⚠ fact against primary docs** (cursor.com/docs, docs.x.ai, NVIDIA DGX Spark docs) —
    version numbers and model IDs here came partly from unreliable sources.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs the Fable-Mode pack into a target project's .claude directory
+# Installs the Fable Mode pack into a target project's .claude directory
 # and wires the doctrine into its CLAUDE.md via an @import line.
 #
 # Usage:  ./install.sh [--update] /path/to/project
@@ -32,15 +32,22 @@ pack_version="$(cat "$src/fable/VERSION" 2>/dev/null || true)"
 if [ "$update" -eq 1 ]; then
     old_version="$(cat "$dest/fable/VERSION" 2>/dev/null || true)"
     [ -n "$old_version" ] || old_version='unversioned pre-1.0 install'
-    echo "updating Fable-Mode $old_version -> $pack_version in $target"
+    echo "updating Fable Mode $old_version -> $pack_version in $target"
 else
-    echo "installing Fable-Mode v$pack_version into $target"
+    echo "installing Fable Mode v$pack_version into $target"
 fi
+
+# Read before the copy loop: a fresh copy of VERSION must not mask a stale install.
+installed_version="$(cat "$dest/fable/VERSION" 2>/dev/null || true)"
 
 copied=0
 skipped=0
 while IFS= read -r -d '' f; do
     rel="${f#"$src"/}"
+    # Session-local / OS droppings are not pack files — never ship them.
+    case "$(basename "$f")" in
+        settings.local.json|.DS_Store) echo "skip (session-local): .claude/$rel"; continue ;;
+    esac
     out="$dest/$rel"
     if [ -e "$out" ] && [ "$update" -ne 1 ]; then
         echo "skip (exists): .claude/$rel"
@@ -65,7 +72,7 @@ else
 fi
 
 echo "done: $copied file(s) copied, $skipped skipped"
-if [ "$skipped" -gt 0 ] && [ "$update" -ne 1 ]; then
+if [ "$skipped" -gt 0 ] && [ "$update" -ne 1 ] && [ "$installed_version" != "$pack_version" ]; then
     echo "run with --update to refresh pack files to v$pack_version"
 fi
 echo "restart any open Claude Code session in the target project - agent types register at session start"

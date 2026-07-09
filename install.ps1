@@ -1,4 +1,4 @@
-# Installs the Fable-Mode pack into a target project's .claude directory
+# Installs the Fable Mode pack into a target project's .claude directory
 # and wires the doctrine into its CLAUDE.md via an @import line.
 #
 # Usage:  .\install.ps1 -Target C:\path\to\project [-Update]
@@ -30,16 +30,21 @@ if (-not $packVersion) { $packVersion = 'unknown' }
 if ($Update) {
     $oldVersion = (& $readVersion (Join-Path $dest 'fable\VERSION'))
     if (-not $oldVersion) { $oldVersion = 'unversioned pre-1.0 install' }
-    Write-Host "updating Fable-Mode $oldVersion -> $packVersion in $Target"
+    Write-Host "updating Fable Mode $oldVersion -> $packVersion in $Target"
 }
 else {
-    Write-Host "installing Fable-Mode v$packVersion into $Target"
+    Write-Host "installing Fable Mode v$packVersion into $Target"
 }
+
+# Read before the copy loop: a fresh copy of VERSION must not mask a stale install.
+$installedVersion = (& $readVersion (Join-Path $dest 'fable\VERSION'))
 
 $copied = 0
 $skipped = 0
 foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
     $rel = $f.FullName.Substring($src.Length).TrimStart('\', '/')
+    # Session-local / OS droppings are not pack files — never ship them.
+    if ($f.Name -in @('settings.local.json', '.DS_Store')) { Write-Host "skip (session-local): .claude\$rel"; continue }
     $out = Join-Path $dest $rel
     if ((Test-Path -LiteralPath $out) -and -not $Update) {
         Write-Host "skip (exists): .claude\$rel"
@@ -66,5 +71,5 @@ else {
 }
 
 Write-Host "done: $copied file(s) copied, $skipped skipped"
-if ($skipped -gt 0 -and -not $Update) { Write-Host "run with -Update to refresh pack files to v$packVersion" }
+if ($skipped -gt 0 -and -not $Update -and $installedVersion -ne $packVersion) { Write-Host "run with -Update to refresh pack files to v$packVersion" }
 Write-Host 'restart any open Claude Code session in the target project - agent types register at session start'

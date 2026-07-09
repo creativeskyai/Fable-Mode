@@ -1,6 +1,18 @@
 # Changelog
 
-The first `## ` heading below must match `.claude/fable/VERSION` — `tools/check-workflows.cjs` enforces it. If a release ever removes a shipped file, list the stale path here so updaters can delete it manually.
+If a release ever removes a shipped file, the entry lists the stale path so `--update` users can delete it manually.
+
+## 1.4.0 — 2026-07-09
+
+Open-source release under MIT. No functional changes to the pack's machinery — every workflow and agent behaves exactly as in 1.3.0; the only shipped-file edits are the version stamp and one naming fix.
+
+- MIT license (root `LICENSE`); the pack may now be installed, modified, and redistributed freely.
+- Community infrastructure: `CONTRIBUTING.md` (the wiring rules and validation commands a PR must respect), `CODE_OF_CONDUCT.md`, `SECURITY.md` (what the attack surface of an instruction pack actually is), issue forms, and a PR template that asks for the checker + installer smoke test.
+- README rebuilt for public consumption: banner, clone-and-install quickstart, the review pipeline explained and illustrated, per-model guidance (Opus 4.8 / Sonnet 5 / Haiku 4.5, and how the pack composes with Claude Code's `ultracode` setting), FAQ, non-affiliation notice. Visual assets live in `assets/` (repo-level, never shipped by the installers).
+- Naming standardized to "Fable Mode" in all prose and program output ("Fable-Mode" remains only as the repo slug); the one shipped-file instance was in the `fable` skill's partial-install message.
+- Installers no longer suggest `--update` when the target already has the current pack version, read the installed version *before* copying (so a freshly copied `VERSION` can't mask a stale pre-1.0 install — caught by the pack's own review fleet), and never ship session-local files (`settings.local.json`, `.DS_Store`) even when present in a working clone.
+- CI hardened: `permissions: contents: read`, push runs restricted to `main` (PRs still get their own runs).
+- `PORTABILITY-PROPOSAL.md` moved to `docs/`, reframed for public readers (neutral draft banner, internal review notes generalized, an unverifiable third-party security claim replaced with general supply-chain guidance).
 
 ## 1.3.0 — 2026-07-07
 
