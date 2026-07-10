@@ -2,6 +2,13 @@
 
 If a release ever removes a shipped file, the entry lists the stale path so `--update` users can delete it manually.
 
+## 1.4.1 — 2026-07-10
+
+Release publishing is now automated; this is the first published GitHub Release. No pack changes beyond the `VERSION` stamp — if you're arriving fresh, the 1.4.0 entry below is what's actually new (MIT licensing, community docs, the rebuilt README, hardened installers and CI).
+
+- New `release` workflow (Actions → release → Run workflow): runs the wiring checker, then tags `v<VERSION>` on the dispatched commit and publishes a GitHub Release whose body is that version's changelog section. It refuses to overwrite an existing release, so a forgotten version bump fails loudly instead of clobbering history.
+- `CONTRIBUTING.md` release steps updated to match.
+
 ## 1.4.0 — 2026-07-09
 
 Open-source release under MIT. No functional changes to the pack's machinery — every workflow and agent behaves exactly as in 1.3.0; the only shipped-file edits are the version stamp and one naming fix.
