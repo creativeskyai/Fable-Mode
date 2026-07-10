@@ -233,7 +233,7 @@ Orchestration multiplies agents, and the pack is honest about it: `/fable-review
 <details>
 <summary><b>Does it work outside Claude Code?</b></summary>
 
-The doctrine, agents, and skills port reasonably (they're markdown); the workflow scripts are Claude-Code-specific (the Workflow tool's JS sandbox). Every skill ships an Agent-tool fallback that emulates its stages. A draft analysis of Cursor/local-model portability lives in [docs/PORTABILITY-PROPOSAL.md](docs/PORTABILITY-PROPOSAL.md).
+The doctrine, agents, and skills port reasonably (they're markdown); the workflow scripts are Claude-Code-specific (the Workflow tool's JS sandbox). Every skill ships an Agent-tool fallback that emulates its stages, and on hosts that read `.claude/` directories (Cursor and friends) that fallback becomes the primary path. First-class support for other harnesses is open for discussion in the issues.
 </details>
 
 <details>

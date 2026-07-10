@@ -2,6 +2,13 @@
 
 If a release ever removes a shipped file, the entry lists the stale path so `--update` users can delete it manually.
 
+## 1.4.2 — 2026-07-10
+
+Repo slimming; no pack changes beyond the `VERSION` stamp.
+
+- `CODE_OF_CONDUCT.md` removed — a skills library doesn't need one; standard open-source courtesy applies and anything off can go to Hello@creativesky.ai.
+- `docs/PORTABILITY-PROPOSAL.md` removed — the draft analysis was research exhaust, not product; it lives on in git history, and the README FAQ now covers portability in two sentences.
+
 ## 1.4.1 — 2026-07-10
 
 Release publishing is now automated; this is the first published GitHub Release. No pack changes beyond the `VERSION` stamp — if you're arriving fresh, the 1.4.0 entry below is what's actually new (MIT licensing, community docs, the rebuilt README, hardened installers and CI).
