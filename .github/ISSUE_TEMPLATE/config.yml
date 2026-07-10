@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "Which command do I run?"
+    url: https://github.com/creativeskyai/Fable-Mode/blob/main/.claude/fable/GUIDE.md
+    about: The one-page routing guide that ships with the pack — what to run, when, and what runs itself.

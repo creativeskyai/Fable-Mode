@@ -16,7 +16,7 @@ node tools/check-workflows.cjs
 
 # Smoke-test an installer against a throwaway directory (must be idempotent on a second run,
 # must skip existing files, must not duplicate the CLAUDE.md import line)
-./install.sh /tmp/fable-target        # or: .\install.ps1 -Target <dir>
+mkdir -p /tmp/fable-target && ./install.sh /tmp/fable-target   # or: .\install.ps1 -Target <dir>
 ```
 
 ## Architecture: four layers wired by name

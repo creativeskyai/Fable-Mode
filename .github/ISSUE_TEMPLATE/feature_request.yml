@@ -1,0 +1,21 @@
+name: Feature request
+description: Propose a new workflow, skill, agent, or doctrine change
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The task you couldn't express
+      description: What were you trying to get Claude Code to do, and where did the current pack fall short?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed shape
+      description: "Which layer does it belong to — doctrine, agent, workflow, or skill? What would invoking it look like?"
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do today instead
+      description: The workaround, if any. Helps judge how much structure the problem actually needs.

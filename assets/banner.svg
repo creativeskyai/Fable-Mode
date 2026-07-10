@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="Fable Mode — Fable 5's Ultracode discipline, ported to the models you can run all day">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1020"/>
+      <stop offset="0.55" stop-color="#10182e"/>
+      <stop offset="1" stop-color="#151033"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b7cff"/>
+      <stop offset="1" stop-color="#38d9f5"/>
+    </linearGradient>
+    <radialGradient id="glowV" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8b7cff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#8b7cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowC" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#38d9f5" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#38d9f5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- card -->
+  <rect x="1.5" y="1.5" width="1197" height="297" rx="22" fill="url(#bg)" stroke="#2a3557" stroke-width="1.5"/>
+
+  <!-- faint dot grid -->
+  <g fill="#8b9bd1" opacity="0.14">
+    <circle cx="60" cy="40" r="1.6"/><circle cx="140" cy="252" r="1.6"/><circle cx="260" cy="48" r="1.6"/>
+    <circle cx="420" cy="250" r="1.6"/><circle cx="530" cy="42" r="1.6"/><circle cx="640" cy="256" r="1.6"/>
+    <circle cx="705" cy="60" r="1.6"/><circle cx="1140" cy="60" r="1.6"/><circle cx="1150" cy="244" r="1.6"/>
+    <circle cx="360" cy="150" r="1.6"/><circle cx="600" cy="130" r="1.6"/><circle cx="80" cy="150" r="1.6"/>
+  </g>
+
+  <!-- ambient glows -->
+  <circle cx="950" cy="150" r="150" fill="url(#glowV)"/>
+  <circle cx="1080" cy="90" r="110" fill="url(#glowC)"/>
+
+  <!-- ===== orchestration constellation (right) ===== -->
+  <g transform="translate(950,150)">
+    <!-- orbit ring -->
+    <circle r="98" fill="none" stroke="#3d4a77" stroke-width="1" stroke-dasharray="3 7" opacity="0.9"/>
+    <!-- spokes -->
+    <g stroke="#5d6ea8" stroke-width="1.2" opacity="0.75">
+      <line x1="0" y1="0" x2="0" y2="-98"/>
+      <line x1="0" y1="0" x2="76.6" y2="-61.3"/>
+      <line x1="0" y1="0" x2="95.5" y2="21.8"/>
+      <line x1="0" y1="0" x2="42.5" y2="88.3"/>
+      <line x1="0" y1="0" x2="-42.5" y2="88.3"/>
+      <line x1="0" y1="0" x2="-95.5" y2="21.8"/>
+      <line x1="0" y1="0" x2="-76.6" y2="-61.3"/>
+    </g>
+    <!-- the seven agents -->
+    <g>
+      <circle cx="0" cy="-98" r="7" fill="#38d9f5"/>
+      <circle cx="76.6" cy="-61.3" r="7" fill="#8b7cff"/>
+      <circle cx="95.5" cy="21.8" r="7" fill="#f471b5"/>
+      <circle cx="42.5" cy="88.3" r="7" fill="#38d9f5"/>
+      <circle cx="-42.5" cy="88.3" r="7" fill="#8b7cff"/>
+      <circle cx="-95.5" cy="21.8" r="7" fill="#f4b860"/>
+      <circle cx="-76.6" cy="-61.3" r="7" fill="#7ee2a8"/>
+    </g>
+    <!-- orchestrator core -->
+    <circle r="15" fill="#0b1020" stroke="url(#accent)" stroke-width="3"/>
+    <circle r="5" fill="url(#accent)"/>
+  </g>
+
+  <!-- ===== wordmark (left) ===== -->
+  <g font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="80" y="106" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace" font-size="17" letter-spacing="3" fill="#38d9f5">A .CLAUDE/ PACK FOR CLAUDE CODE</text>
+    <text x="77" y="172" font-size="66" font-weight="800" letter-spacing="1" fill="#eef2ff">Fable <tspan fill="url(#accent)">Mode</tspan></text>
+    <text x="80" y="216" font-size="22" fill="#9aa7c7">Fable 5&#8217;s Ultracode discipline, ported to the models you can run all day.</text>
+    <text x="80" y="256" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace" font-size="15" fill="#6d7ba3">7 agents &#183; 7 workflows &#183; 10 skills &#183; adversarial verification &#183; marathon runs</text>
+  </g>
+</svg>
