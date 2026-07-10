@@ -11,7 +11,7 @@ Open-source release under MIT. No functional changes to the pack's machinery —
 - README rebuilt for public consumption: banner, clone-and-install quickstart, the review pipeline explained and illustrated, per-model guidance (Opus 4.8 / Sonnet 5 / Haiku 4.5, and how the pack composes with Claude Code's `ultracode` setting), FAQ, non-affiliation notice. Visual assets live in `assets/` (repo-level, never shipped by the installers).
 - Naming standardized to "Fable Mode" in all prose and program output ("Fable-Mode" remains only as the repo slug); the one shipped-file instance was in the `fable` skill's partial-install message.
 - Installers no longer suggest `--update` when the target already has the current pack version, read the installed version *before* copying (so a freshly copied `VERSION` can't mask a stale pre-1.0 install — caught by the pack's own review fleet), and never ship session-local files (`settings.local.json`, `.DS_Store`) even when present in a working clone.
-- CI hardened: `permissions: contents: read`, push runs restricted to `main` (PRs still get their own runs).
+- CI hardened: `permissions: contents: read`, push runs restricted to `main` (PRs still get their own runs), 10-minute job timeouts, and superseded PR runs auto-cancelled — the last two found by the pack's own review fleet run over this release.
 - `PORTABILITY-PROPOSAL.md` moved to `docs/`, reframed for public readers (neutral draft banner, internal review notes generalized, an unverifiable third-party security claim replaced with general supply-chain guidance).
 
 ## 1.3.0 — 2026-07-07

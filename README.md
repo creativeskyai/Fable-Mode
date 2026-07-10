@@ -30,6 +30,10 @@ With the doctrine wired in you don't run commands — ask for work in plain lang
 
 The step most packs skip is the second one: **findings don't go to you, they go on trial.** Three skeptics per finding, each judging through a different lens (trace it line by line; is it reachable from a real entry point; is the impact as claimed), majority verdict. A plausible-but-wrong finding dies in the pipeline instead of costing you twenty minutes of disproving it yourself.
 
+And it isn't hypothetical. This very release was reviewed by its own fleet before merge — 28 agents, 8 raw findings, 3 survived cross-examination (one installer bug a skeptic reproduced live, two CI gaps), all fixed before merge. The five refuted claims died because skeptics verify the tree, not the finder's word:
+
+<img src="assets/demo-review.png" alt="Real fable-review run over this release: 4 finders, 8 raw findings, 24 skeptic votes; 3 confirmed (install.sh version-hint ordering, missing CI timeout-minutes, missing CI cancel-in-progress) and 5 refuted as stale because the fixes had already landed" width="100%">
+
 ## Install
 
 From a clone, into any project (the installer never overwrites existing files):
