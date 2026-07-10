@@ -1,0 +1,38 @@
+name: release
+# Tags v<VERSION> and publishes a GitHub Release whose body is that version's
+# CHANGELOG section. Manual dispatch only (Actions → release → Run workflow):
+# tags can't be pushed from every dev environment, so publishing is one button.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: wiring checker gate
+        run: node tools/check-workflows.cjs
+      - name: publish release from the changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ver="$(cat .claude/fable/VERSION)"
+          awk -v v="$ver" '$0 ~ "^## " v " " {f=1; next} /^## /{f=0} f' CHANGELOG.md > notes.md
+          [ -s notes.md ] || { echo "no CHANGELOG section found for $ver"; exit 1; }
+          if gh release view "v$ver" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release v$ver already exists — bump .claude/fable/VERSION first"
+            exit 1
+          fi
+          gh release create "v$ver" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Fable Mode $ver" \
+            --notes-file notes.md

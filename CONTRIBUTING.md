@@ -59,4 +59,4 @@ CI runs both, plus the PowerShell installer on Windows. A PR that fails the chec
 
 ## Releases
 
-Maintainers cut releases by bumping `.claude/fable/VERSION`, adding the matching `CHANGELOG.md` heading (the checker enforces the match), and tagging. If a release removes a shipped file, the changelog lists the stale path so `--update` users can delete it manually.
+Maintainers cut releases by bumping `.claude/fable/VERSION`, adding the matching `CHANGELOG.md` heading (the checker enforces the match), merging, and running the `release` workflow (Actions → release → Run workflow on `main`). The workflow re-runs the checker, tags `v<VERSION>`, and publishes a GitHub Release with that version's changelog section as the body; it fails rather than overwrite an existing release. If a release removes a shipped file, the changelog lists the stale path so `--update` users can delete it manually.
