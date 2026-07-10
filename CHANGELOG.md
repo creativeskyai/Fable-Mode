@@ -6,7 +6,7 @@ If a release ever removes a shipped file, the entry lists the stale path so `--u
 
 Release publishing is now automated; this is the first published GitHub Release. No pack changes beyond the `VERSION` stamp — if you're arriving fresh, the 1.4.0 entry below is what's actually new (MIT licensing, community docs, the rebuilt README, hardened installers and CI).
 
-- New `release` workflow (Actions → release → Run workflow): runs the wiring checker, then tags `v<VERSION>` on the dispatched commit and publishes a GitHub Release whose body is that version's changelog section. It refuses to overwrite an existing release, so a forgotten version bump fails loudly instead of clobbering history.
+- New `release` workflow: on every push to `main` (manual dispatch kept as fallback) it runs the wiring checker, and if the version stamped in `.claude/fable/VERSION` has no GitHub Release yet, tags `v<VERSION>` and publishes one with that version's changelog section as the body. Already-published versions are a clean no-op, so releasing is just merging a version bump.
 - `CONTRIBUTING.md` release steps updated to match.
 
 ## 1.4.0 — 2026-07-09
