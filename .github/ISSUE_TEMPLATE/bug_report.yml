@@ -1,0 +1,46 @@
+name: Bug report
+description: A workflow, skill, agent, or installer misbehaved
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Pack version
+      description: Contents of `.claude/fable/VERSION` in the affected project.
+      placeholder: "1.4.0"
+    validations:
+      required: true
+  - type: input
+    id: claude-code
+    attributes:
+      label: Claude Code version and surface
+      description: "`claude --version`, and where it ran (CLI, desktop, web, IDE)."
+      placeholder: "2.1.160, CLI on macOS"
+    validations:
+      required: true
+  - type: dropdown
+    id: piece
+    attributes:
+      label: Which piece
+      options:
+        - a skill (/fable-*, /ultra)
+        - a workflow script
+        - an agent
+        - the doctrine (FABLE.md)
+        - install.sh / install.ps1
+        - tools/check-workflows.cjs
+        - not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you invoked, what you expected, what you got. Paste workflow `log()` lines or error text verbatim if you have them.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything unusual about the setup
+      description: Fresh install without a session restart ("agent type not found"), edited pack files, unusual model pinning, no git repo, etc.
