@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="Fable Mode — Fable 5's Ultracode discipline, ported to the models you can run all day" width="100%">
+<img src="assets/banner.png" alt="Fable Mode — Fable 5's Ultracode discipline, ported to the models you can run all day" width="100%">
 
 [![CI](https://github.com/creativeskyai/Fable-Mode/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/creativeskyai/Fable-Mode/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3da638)](LICENSE)
