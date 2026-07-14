@@ -1,0 +1,42 @@
+name: release
+# Publishes the version stamped in .claude/fable/VERSION as a git tag +
+# GitHub Release (body = that version's CHANGELOG section). Runs on every
+# push to main and is idempotent: if the stamped version already has a
+# release, it does nothing — so releasing is just merging a version bump.
+# Manual dispatch is kept as a fallback.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: wiring checker gate
+        run: node tools/check-workflows.cjs
+      - name: publish release from the changelog (no-op if already published)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ver="$(cat .claude/fable/VERSION)"
+          if gh release view "v$ver" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "v$ver is already published — nothing to do"
+            exit 0
+          fi
+          awk -v v="$ver" '$0 ~ "^## " v " " {f=1; next} /^## /{f=0} f' CHANGELOG.md > notes.md
+          [ -s notes.md ] || { echo "no CHANGELOG section found for $ver"; exit 1; }
+          gh release create "v$ver" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Fable Mode $ver" \
+            --notes-file notes.md
