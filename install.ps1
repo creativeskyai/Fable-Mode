@@ -44,7 +44,7 @@ $skipped = 0
 foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
     $rel = $f.FullName.Substring($src.Length).TrimStart('\', '/')
     # Session-local / OS droppings are not pack files — never ship them.
-    if ($f.Name -in @('settings.local.json', '.DS_Store')) { Write-Host "skip (session-local): .claude\$rel"; continue }
+    if ($f.Name -in @('settings.local.json', 'scheduled_tasks.lock', '.DS_Store')) { Write-Host "skip (session-local): .claude\$rel"; continue }
     $out = Join-Path $dest $rel
     if ((Test-Path -LiteralPath $out) -and -not $Update) {
         Write-Host "skip (exists): .claude\$rel"
