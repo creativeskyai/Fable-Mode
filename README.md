@@ -69,7 +69,7 @@ Why low effort on the driver: the pack's structure — independent finders, skep
 subagent_model: opus     # fable | opus | sonnet | haiku | inherit (= session model)
 subagent_effort: medium  # low | medium | high | xhigh | inherit
 fleet: standard          # light | standard | max — scales pools, votes, round caps
-votes: 3                 # skeptics per review finding
+# votes: 3               # uncomment to pin the skeptic count instead of the fleet's (1/3/5)
 ```
 
 Change it any time — applies to the next command, no restart:
@@ -162,7 +162,7 @@ It adds one import line and namespaced files, and the installer never overwrites
 <details>
 <summary><b>What does a run cost?</b></summary>
 
-Orchestration multiplies agents: `/fable-review` is ~16 agents at standard fleet, ~6 at light. The config is the dial — `/fable-config fleet light` halves the pools and drops to single-skeptic verification. "Quick" in a request drops to solo work; a stated token budget is a hard cap.
+Orchestration multiplies agents: `/fable-review` is ~16 agents at standard fleet (4 finders, 3 skeptics per finding) and roughly a third of that at light (2 finders, 1 skeptic per finding). The config is the dial — `/fable-config fleet light` shrinks every workflow's pools, votes, and caps. "Quick" in a request drops to solo work; a stated token budget is a hard cap.
 </details>
 
 <details>

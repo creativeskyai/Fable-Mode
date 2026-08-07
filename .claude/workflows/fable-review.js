@@ -80,8 +80,12 @@ const LENSES = [
 // Must stay single-line — the drift checker compares this line byte-for-byte across workflows.
 const CONTRAST = 'First state the strongest concrete case that the claim is REAL, then the strongest case that it is NOT, then decide: set refuted=true only if the against-case wins under your lens, citing the decisive evidence.'
 
+// Fleet scaling — announced, per the no-silent-caps rule.
+const dimensions = fleet === 'light' ? DIMENSIONS.slice(0, 2) : DIMENSIONS
+if (dimensions.length < DIMENSIONS.length) log('fleet light: ' + dimensions.length + ' of ' + DIMENSIONS.length + ' finder dimensions (security and resources dropped)')
+
 const perDimension = await pipeline(
-  DIMENSIONS,
+  dimensions,
   d => run(
     'Review ' + target + '.\n\n' +
     'Focus exclusively on this dimension: ' + d.focus + '.\n\n' +

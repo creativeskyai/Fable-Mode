@@ -6,7 +6,7 @@ This project has Fable Mode installed: run every substantive task with the struc
 
 ## Config
 
-`.claude/fable/CONFIG.md` holds the project's defaults: subagent model, subagent effort, fleet size, skeptic votes. Read it before dispatching any fable workflow and pass its yaml keys as `config` in the workflow args (e.g. `args: { question: "...", config: { subagent_model: "opus", subagent_effort: "medium", fleet: "standard", votes: 3 } }`). If the file is missing, pass no config — workflows default to standard. `/fable-config` changes the file; words in the request override it for one run.
+`.claude/fable/CONFIG.md` holds the project's defaults: subagent model, subagent effort, fleet size, skeptic votes. Read it before dispatching any fable workflow and pass its yaml keys as `config` in the workflow args (e.g. `args: { question: "...", config: { subagent_model: "opus", subagent_effort: "medium", fleet: "standard" } }` — pass only keys the file actually sets; an explicit `votes` overrides the fleet's own count). If the file is missing, pass no config — workflows default to standard. `/fable-config` changes the file; words in the request override it for one run.
 
 ## Phases
 

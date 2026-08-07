@@ -101,11 +101,12 @@ for (const [label, re] of TWINS) {
 // A file that deletes its copy of a twin block would silently drop out of the drift
 // comparison above — require the blocks where they are load-bearing.
 const REQUIRED_TWINS = { 'fable-review.js': ['const LENSES', 'const CONTRAST'], 'fable-exhaust.js': ['const LENSES', 'const CONTRAST'] };
-// Every workflow must carry the config block and the run() helper — a workflow
-// without them silently ignores CONFIG.md and the fresh-install fallback.
+// Every workflow must carry the config block and the run() helper, matching the
+// twin regex exactly — an includes() check alone would let a copy whose anchor
+// lines were edited drop out of the drift comparison above while still "existing".
 for (const [f, raw] of workflowRaw) {
-  for (const n of ['const cfg = ', 'const run = ']) {
-    if (!raw.includes(n)) bad(f, 'required shared block "' + n.trim() + '" is missing');
+  for (const [label, re] of TWINS.filter(([l]) => l === 'config block' || l === 'run() helper')) {
+    if (!re.test(raw)) bad(f, 'required shared block (' + label + ') is missing or its anchor lines have drifted from the canonical form');
   }
 }
 for (const [f, needles] of Object.entries(REQUIRED_TWINS)) {
