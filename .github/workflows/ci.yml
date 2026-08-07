@@ -45,9 +45,11 @@ jobs:
         run: |
           echo tampered >> "$T/.claude/fable/FABLE.md"
           echo user-owned > "$T/.claude/agents/user-own.md"
+          echo 'fleet: light' >> "$T/.claude/fable/CONFIG.md"
           ./install.sh --update "$T"
           cmp .claude/fable/FABLE.md "$T/.claude/fable/FABLE.md"
           [ "$(cat "$T/.claude/agents/user-own.md")" = "user-owned" ]
+          grep -q 'fleet: light' "$T/.claude/fable/CONFIG.md" || { echo "update overwrote user CONFIG.md"; exit 1; }
 
   install-ps1:
     runs-on: windows-latest
@@ -74,8 +76,10 @@ jobs:
 
           Add-Content (Join-Path $t '.claude\fable\FABLE.md') 'tampered'
           Set-Content (Join-Path $t '.claude\agents\user-own.md') 'user-owned'
+          Add-Content (Join-Path $t '.claude\fable\CONFIG.md') 'fleet: light'
           .\install.ps1 -Target $t -Update
           $a = (Get-FileHash .claude\fable\FABLE.md).Hash
           $b = (Get-FileHash (Join-Path $t '.claude\fable\FABLE.md')).Hash
           if ($a -ne $b) { throw 'update did not restore FABLE.md byte-identical' }
           if ((Get-Content (Join-Path $t '.claude\agents\user-own.md')) -ne 'user-owned') { throw 'update touched a user-owned file' }
+          if (-not (Select-String -Path (Join-Path $t '.claude\fable\CONFIG.md') -SimpleMatch 'fleet: light' -Quiet)) { throw 'update overwrote user CONFIG.md' }

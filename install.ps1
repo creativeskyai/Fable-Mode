@@ -46,6 +46,12 @@ foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
     # Session-local / OS droppings are not pack files — never ship them.
     if ($f.Name -in @('settings.local.json', 'scheduled_tasks.lock', '.DS_Store')) { Write-Host "skip (session-local): .claude\$rel"; continue }
     $out = Join-Path $dest $rel
+    # CONFIG.md is user-owned tuning once installed — -Update never overwrites it.
+    if (($rel -replace '\\', '/') -eq 'fable/CONFIG.md' -and (Test-Path -LiteralPath $out) -and $Update) {
+        Write-Host "skip (user config): .claude\$rel"
+        $skipped++
+        continue
+    }
     if ((Test-Path -LiteralPath $out) -and -not $Update) {
         Write-Host "skip (exists): .claude\$rel"
         $skipped++

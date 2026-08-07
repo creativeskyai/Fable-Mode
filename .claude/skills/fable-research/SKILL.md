@@ -6,6 +6,8 @@ argument-hint: "<question>"
 
 The user invoked /fable-research: that is explicit opt-in to workflow orchestration — call the Workflow tool.
 
+Before dispatching, read `.claude/fable/CONFIG.md` if it exists and pass its yaml keys as `config` in the workflow args; words in the user's request override it for this run ("quick" = fleet light, "thorough"/"audit" = fleet max).
+
 1. The arguments are the research question. If they are empty, ask for the question first.
 2. Run the named workflow `fable-research` with `args: { question: "<the question>" }`.
 3. Deliver the synthesized answer with its path:line citations intact. Separate what the evidence establishes from what remains uncertain, say what the completeness critic flagged — or that it found the answer complete — and name any leads the workflow returned as unread.

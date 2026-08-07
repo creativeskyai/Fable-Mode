@@ -8,6 +8,8 @@ The user invoked /ultra: that is explicit opt-in to multi-agent workflow orchest
 
 The arguments to this command are the task. If there are no arguments, ask the user what the task is before doing anything else.
 
+Read `.claude/fable/CONFIG.md` once if it exists and pass its yaml keys as `config` in the args of every workflow below; words in the user's request override it for this run.
+
 Run the task through the phases, reading each workflow's result before choosing the next step.
 
 1. **Understand.** Unless the relevant code is already well known to you from this session, run the named workflow `fable-understand` with `args: { focus: "<the subsystem this task touches>" }`.

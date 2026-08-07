@@ -17,12 +17,23 @@ const verifyCmd = input.verify ||
   "the project's documented build and test commands (read the root CLAUDE.md and its @path imports and AGENTS.md first; " +
   "detect from package.json scripts, Makefile, or CI config only if the docs name none)"
 
+// Config arrives via args.config — the skills read .claude/fable/CONFIG.md and pass it.
+// sub() applies the configured subagent model/effort to every agent call in run().
+const cfg = (input && input.config && typeof input.config === 'object') ? input.config : {}
+const fleet = ['light', 'standard', 'max'].includes(cfg.fleet) ? cfg.fleet : 'standard'
+const sub = opts => ({
+  ...opts,
+  ...(cfg.subagent_model && cfg.subagent_model !== 'inherit' ? { model: cfg.subagent_model } : {}),
+  ...(cfg.subagent_effort && cfg.subagent_effort !== 'inherit' ? { effort: cfg.subagent_effort } : {}),
+})
+if (cfg.subagent_model || cfg.subagent_effort || cfg.fleet) log('config: subagents on ' + (cfg.subagent_model || 'the session model') + ' at ' + (cfg.subagent_effort || 'session') + ' effort, fleet ' + fleet)
+
 // Falls back to the default agent when the pack's agents aren't registered yet
 // (agent types load at session start — a fresh install needs a restart).
-const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+const run = (prompt, opts) => agent(prompt, sub(opts)).catch(e => {
   if (!opts.agentType || !String(e).includes('not found')) throw e
   log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
-  return agent(prompt, { ...opts, agentType: undefined })
+  return agent(prompt, { ...sub(opts), agentType: undefined })
 })
 
 const SITES = {
@@ -121,7 +132,7 @@ const bad = results.filter(r => r && !r.ok)
 if (bad.length) log(bad.length + ' file(s) failed their per-file check — see perFileProblems')
 
 phase('Final verify')
-const suite = await agent(
+const suite = await run(
   'A migration just touched ' + files.length + ' files ("' + input.instruction + '"). ' +
   'Run ' + verifyCmd + ' and report the outcome verbatim — do not fix anything, just report what passed and what failed.',
   { label: 'project-checks', phase: 'Final verify' }

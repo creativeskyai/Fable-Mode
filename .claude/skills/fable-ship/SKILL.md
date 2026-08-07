@@ -6,6 +6,8 @@ argument-hint: "[scope]"
 
 The user invoked /fable-ship: that is explicit opt-in to workflow orchestration — call the Workflow tool.
 
+Before dispatching, read `.claude/fable/CONFIG.md` if it exists and pass its yaml keys as `config` in the workflow args; words in the user's request override it for this run ("quick" = fleet light, "thorough"/"audit" = fleet max).
+
 1. From the arguments, determine what is being shipped (a release, a deploy, a package publish). Default: the current state of the repository.
 2. Run the named workflow `fable-ship` with `args: { scope: "<what is being shipped>" }`.
 3. Report the verdict first — ready or not — then every blocker and warning with its evidence, then the ship mechanics the workflow returns (`shipCommands` and `releaseNotes`). If no ship command was detected, say so rather than inventing one.

@@ -49,6 +49,12 @@ while IFS= read -r -d '' f; do
         settings.local.json|scheduled_tasks.lock|.DS_Store) echo "skip (session-local): .claude/$rel"; continue ;;
     esac
     out="$dest/$rel"
+    # CONFIG.md is user-owned tuning once installed — --update never overwrites it.
+    if [ "$rel" = "fable/CONFIG.md" ] && [ -e "$out" ] && [ "$update" -eq 1 ]; then
+        echo "skip (user config): .claude/$rel"
+        skipped=$((skipped + 1))
+        continue
+    fi
     if [ -e "$out" ] && [ "$update" -ne 1 ]; then
         echo "skip (exists): .claude/$rel"
         skipped=$((skipped + 1))

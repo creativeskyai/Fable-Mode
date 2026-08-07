@@ -1,100 +1,80 @@
 # Fable Mode — user guide
 
-One page: what to run, when to run it, and what runs itself. Ships with the pack
-(`.claude/fable/GUIDE.md`) so it's in every project that has Fable Mode installed;
-it is never loaded into context — it's for you, not the model.
+One page: what to run, when, and how to dial cost. Ships with the pack
+(`.claude/fable/GUIDE.md`); it's for you, never loaded into context.
 
 ## The default: run nothing
 
-With the pack installed, the doctrine (`FABLE.md`) is in every session's context and
-the model orchestrates on its own: it maps unfamiliar code before designing, panels
-wide decisions, reviews its own diffs with skeptics, and gates releases. Ask for work
-in plain language. The slash commands below are for when you want specific machinery,
-a specific scale, or a run the doctrine wouldn't start by itself (marathon).
+With the pack installed, the doctrine (`FABLE.md`) is in every session and the
+model orchestrates on its own: maps unfamiliar code, panels wide decisions,
+reviews its own diffs with skeptics, gates releases. Ask for work in plain
+language. The slash commands are for when you want specific machinery at a
+specific scale.
 
-**What the pack reads from your repo:** workflows treat your project's own docs as
-authoritative before self-detecting — the root CLAUDE.md and its `@path` imports,
-AGENTS.md, a decision log (DECISIONS.md or docs/DECISIONS.md, where entries marked
-Locked are settled constraints), and FABLE-RUN.md's Walls. Document your commands
-and rules once, in your own files, and every fleet uses them.
+## Set up once: models and effort
 
-## Ad-hoc: pick by the question you're asking
+Two dials, two places:
 
-In lifecycle order — the order you'd use them building a feature from scratch:
+1. **Main agent** (harness settings): pick the driver with `/model` and its
+   effort with `/effort`. The value setup is Fable 5 at **low** effort — recent
+   benchmarks keep showing lower effort (and often less thinking) is faster,
+   cheaper, and just as good when the structure does the verifying. Opus 5 is
+   the other strong driver. Thinking toggles with Tab in the CLI or `/config`.
+2. **Subagents** (`.claude/fable/CONFIG.md`): the pack ships with subagents on
+   **opus at medium effort**, fleet **standard**, **3** skeptic votes. Change it
+   with `/fable-config` — no restart, applies to the next command:
+
+```
+/fable-config                       # show current settings
+/fable-config fleet light           # smaller pools, 1 skeptic, lower caps
+/fable-config subagent_model haiku  # cheap subagents
+/fable-config max                   # audit mode: 5 votes, raised caps
+/fable-config value                 # back to the shipped defaults
+```
+
+Words in a request override config for one run: "quick" / "no agents" → solo;
+"thorough" / "audit" → fleet max. A stated budget ("+500k") is a hard cap.
+
+## Pick by the question
 
 | Your question | Run | Cost feel |
 |---|---|---|
-| "How is this codebase / subsystem organized?" (new territory) | `/fable-understand` | medium |
+| "How is this codebase organized?" (new territory) | `/fable-understand` | medium |
 | "Where is X handled? What breaks if I change Y?" | `/fable-research` | medium |
-| "How should I build X?" (wide-open approach, decision only) | `/fable-plan` | medium |
-| "Build X" (substantive feature, end to end) | `/ultra` | high |
-| "Apply this same change everywhere" | `/fable-migrate` | scales with sites |
-| "Review this diff / branch / PR" | `/fable-review` | ~16 agents |
+| "How should I build X?" (decision only) | `/fable-plan` | medium |
+| "Build X" (substantive, end to end) | `/ultra` | high |
+| "Apply this change everywhere" | `/fable-migrate` | scales with sites |
+| "Review this diff / branch / PR" | `/fable-review` | ~16 agents at standard |
 | "Find ALL the bugs / audit this module" | `/fable-exhaust` | highest — loops until dry |
-| "Are we ready to release / deploy?" | `/fable-ship` | medium |
+| "Are we ready to release?" | `/fable-ship` | medium |
 | "Keep working on this for hours / days" | `/fable-marathon` | open-ended |
-| Doctrine isn't loaded (fresh clone, no CLAUDE.md wiring) | `/fable` | free |
+| Change defaults | `/fable-config` | free |
+| Doctrine isn't loaded (fresh clone) | `/fable` | free |
 
-**Look-alikes, disambiguated:**
-
-- `/fable-research` vs `/fable-exhaust` — a scoped question gets one bounded sweep;
-  "find all the…" loops until two rounds come up dry. Prefer research unless you
-  really mean *all*.
-- `/fable-plan` vs `/ultra` — plan stops at a synthesized design; ultra carries it
-  through implement and review. Use plan when you want to read the design first.
-- `/fable-review` vs `/fable-ship` — review judges the change; ship judges the
-  release (project checks, hygiene, docs, then a skeptic attacks "ready").
-- `/fable-understand` vs `/fable-research` — a map of territory vs an answer to a
-  question. If you can phrase it as a question, use research.
-
-## Building a feature by hand
-
-If you're driving phases yourself instead of using `/ultra`:
-
-1. `/fable-understand` — only if the territory is unfamiliar this session.
-2. `/fable-plan` — only if more than one reasonable approach exists.
-3. Implement (ask normally; `/fable-migrate` if it's one change across many files).
-4. `/fable-review` — fix confirmed findings, re-run tests.
-5. `/fable-ship` — only when this lands in a release or deploy.
-
-Skipping a step you don't need is correct, not lazy — the doctrine says the same.
+Look-alikes: `/fable-research` answers a scoped question in one bounded sweep;
+`/fable-exhaust` loops until two rounds come up dry — use it only when you mean
+*all*. `/fable-plan` stops at a design; `/ultra` carries it through review.
+`/fable-review` judges the change; `/fable-ship` judges the release.
 
 ## What marathon runs for you
 
-In a `/fable-marathon` run you don't invoke any of the above ad-hoc — the cycle calls
-them as needed: `fable-understand` or `fable-design` to ground a new backlog,
-`fable-design` when an item's approach is genuinely open, `fable-review` plus the
-project's own checks to verify every item, and `fable-ship` to gate anything
-deploy-shaped. Your job is the run file, `FABLE-RUN.md` at the project root:
+`/fable-marathon` cycles a backlog through the full phase discipline and calls
+the other workflows itself. Your job is the run file, `FABLE-RUN.md`:
 
-- **Goal / Backlog** — edit these to steer the run; it re-reads them every cycle.
+- **Goal / Backlog** — edit to steer; it re-reads every cycle.
 - **Walls** — actions that always stop and queue for you (secrets, payments,
-  deploys, anything destructive). Add your own; the run never crosses them.
-- **`- [?]` blocked items** — questions only you can answer; the run keeps cycling
-  past them. Answer in the file or in chat to unblock.
-- **Proposals** — Walls/Invariants the run suggests after failures; they take
-  effect only when you move them up yourself.
+  deploys, anything destructive). The run never crosses them.
+- **`- [?]` blocked items** — questions only you can answer; the run keeps
+  cycling past them until you answer.
 
-For unattended runs: `/loop /fable-marathon` (self-paced) or `/loop 30m /fable-marathon`.
-
-**Loop types, mapped:** a plain prompt is one agentic turn (the doctrine handles it);
-work with a verifiable finish line is a marathon backlog item with a `done-when:`
-command — or the harness's `/goal` for a single task; recurring or time-driven work
-is `/loop` or a scheduled task wrapped around `/fable-marathon`. The pack supplies
-the process; the harness supplies the trigger.
-
-## Scale and cost dial
-
-Words in your request are the dial: "quick" or "no agents" → solo work; nothing
-special → default fleets; "thorough" / "audit" / "make sure" → bigger pools and
-5-vote verification. A budget you state ("+500k") is a hard cap. Every workflow
-logs every bound it applies — a stopped run always says what it skipped.
+Unattended: `/loop /fable-marathon` or a scheduled task pointed at the same
+command. A backlog item's `done-when:` command doubles as a `/goal` condition.
 
 ## If something breaks
 
-- "Agent type not found" everywhere → the pack was just installed; restart the
-  session (runs still finish via a fallback in the meantime).
-- A workflow died mid-run → re-invoke the skill with narrower args; no repo state
-  is lost. Marathon resumes from `FABLE-RUN.md` alone.
-- Edited a skill or workflow → takes effect immediately. Edited an agent or the
-  CLAUDE.md wiring → restart the session.
+- "Agent type not found" everywhere → fresh install; restart the session
+  (runs still finish via a fallback in the meantime).
+- A workflow died mid-run → re-invoke the skill with narrower args; no repo
+  state is lost. Marathon resumes from `FABLE-RUN.md` alone.
+- Edited a skill, workflow, or CONFIG.md → applies immediately. Edited an
+  agent or the CLAUDE.md wiring → restart the session.

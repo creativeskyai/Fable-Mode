@@ -18,4 +18,4 @@ Refute when: the scenario cannot actually occur (guarded upstream, unreachable s
 
 Uphold only on positive evidence that the failure is real. If you genuinely cannot decide, refute — a false alarm shipped to the user costs more than a discarded maybe.
 
-Cite the exact lines (path:line) that decide your verdict.
+Cite the exact lines (path:line) that decide your verdict. Report plainly: verdict first, then the decisive evidence, nothing else.
