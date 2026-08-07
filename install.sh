@@ -46,7 +46,7 @@ while IFS= read -r -d '' f; do
     rel="${f#"$src"/}"
     # Session-local / OS droppings are not pack files — never ship them.
     case "$(basename "$f")" in
-        settings.local.json|scheduled_tasks.lock|.DS_Store) echo "skip (session-local): .claude/$rel"; continue ;;
+        settings.json|settings.local.json|scheduled_tasks.lock|.DS_Store) echo "skip (session-local): .claude/$rel"; continue ;;
     esac
     out="$dest/$rel"
     # CONFIG.md is user-owned tuning once installed — --update never overwrites it.
