@@ -34,7 +34,7 @@ git clone --depth 1 https://github.com/creativeskyai/Fable-Mode.git $tmp
 & "$tmp\install.ps1" C:\path\to\your\project
 ```
 
-That copies `.claude/**` and adds one import line to the target's `CLAUDE.md`. Then **restart any open Claude Code session in that project** — agents register at session start.
+That copies `.claude/**`, adds one import line to the target's `CLAUDE.md`, and — on first install only — creates `.claude/settings.json` pre-approving the **Workflow** and **Agent** tools, so fleet launches don't prompt (that's the standing authorization you're opting into; delete the file to opt out — everything agents *do* still runs under your normal permission mode). If you already have a `settings.json`, it's left untouched and the installer prints the two entries to add. Then **restart any open Claude Code session in that project** — agents register at session start.
 
 To update later, re-run with `--update` / `-Update`: it refreshes pack files, never touches your own files, and never overwrites your `CONFIG.md`. Version at `.claude/fable/VERSION`; changes in [CHANGELOG.md](CHANGELOG.md).
 
@@ -42,7 +42,8 @@ To update later, re-run with `--update` / `-Update`: it refreshes pack files, ne
 <summary><b>Uninstall</b></summary>
 
 1. Remove the `# Fable Mode` heading and `@.claude/fable/FABLE.md` line from the project's `CLAUDE.md`.
-2. Delete the pack files (everything is namespaced `fable*` except `/ultra`):
+2. If the installer created your `.claude/settings.json`, delete it (or just remove the `"Workflow"` / `"Agent"` entries if you've added your own since).
+3. Delete the pack files (everything is namespaced `fable*` except `/ultra`):
 
 ```bash
 rm -rf .claude/fable .claude/skills/ultra .claude/skills/fable*

@@ -8,7 +8,7 @@ Fable Mode ships no runtime application code. The pack is:
 - **Workflow scripts** that run inside Claude Code's sandboxed Workflow tool (no filesystem or Node API access);
 - **Two installer scripts** (`install.sh`, `install.ps1`) that copy files and append one import line to a `CLAUDE.md`.
 
-The installers never delete, never overwrite existing files outside `--update` mode (which only touches pack-owned paths), never elevate, and never touch the network. The agents and workflows the pack defines run entirely under Claude Code's own permission system — the pack cannot grant itself capabilities your Claude Code configuration doesn't allow.
+The installers never delete, never overwrite existing files outside `--update` mode (which only touches pack-owned paths), never elevate, and never touch the network. One deliberate, disclosed exception to "grants nothing": on first install only, if the target has no `.claude/settings.json`, the installer creates one that pre-approves the **Workflow** and **Agent** tools (fleet launches stop prompting — the standing authorization the pack is built around). It never modifies an existing settings file, `--update` never touches it, and deleting the file restores full prompting. Everything the agents and workflows *do* — edits, commands — still runs under Claude Code's own permission system; the pack cannot grant itself capabilities beyond that.
 
 That said, prompt-injection-shaped issues are real for instruction packs: if you find wording in a shipped file that could cause Claude Code to take an action a reasonable user wouldn't expect (bypassing its permission prompts, exfiltrating data, weakening its own verification), treat that as a vulnerability and report it.
 

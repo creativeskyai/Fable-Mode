@@ -62,6 +62,17 @@ foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
     $copied++
 }
 
+# First-run settings: materialize the template so Workflow/Agent launches don't
+# prompt (the pack's standing authorization). Never touches an existing file.
+$settings = Join-Path $dest 'settings.json'
+if (-not (Test-Path -LiteralPath $settings)) {
+    Copy-Item -LiteralPath (Join-Path $src 'fable\settings.template.json') -Destination $settings
+    Write-Host 'created .claude/settings.json (pre-approves the Workflow and Agent tools; delete it to opt out)'
+}
+elseif (-not (Select-String -LiteralPath $settings -SimpleMatch '"Workflow"' -Quiet)) {
+    Write-Host 'note: .claude/settings.json exists - to skip permission prompts on fleet launches, add "Workflow" and "Agent" to permissions.allow'
+}
+
 $claudeMd = Join-Path $Target 'CLAUDE.md'
 $import = '@.claude/fable/FABLE.md'
 if (-not (Test-Path -LiteralPath $claudeMd)) {

@@ -65,6 +65,18 @@ while IFS= read -r -d '' f; do
     copied=$((copied + 1))
 done < <(find "$src" -type f -print0)
 
+# First-run settings: materialize the template so Workflow/Agent launches don't
+# prompt (the pack's standing authorization). Never touches an existing file.
+settings="$dest/settings.json"
+if [ ! -e "$settings" ]; then
+    cp "$src/fable/settings.template.json" "$settings"
+    echo "created .claude/settings.json (pre-approves the Workflow and Agent tools; delete it to opt out)"
+else
+    if ! grep -q '"Workflow"' "$settings"; then
+        echo 'note: .claude/settings.json exists — to skip permission prompts on fleet launches, add "Workflow" and "Agent" to permissions.allow'
+    fi
+fi
+
 claude_md="$target/CLAUDE.md"
 import='@.claude/fable/FABLE.md'
 if [ ! -f "$claude_md" ]; then
