@@ -22,7 +22,9 @@ const sub = opts => ({
 })
 if (cfg.subagent_model || cfg.subagent_effort || cfg.fleet) log('config: subagents on ' + (cfg.subagent_model || 'the session model') + ' at ' + (cfg.subagent_effort || 'session') + ' effort, fleet ' + fleet)
 
-const votes = input.votes || cfg.votes || { light: 1, standard: 3, max: 5 }[fleet]
+// Clamped to at least 1: a zero/negative vote count would spawn no skeptics and
+// mark every raw finding "survived adversarial verification".
+const votes = Math.max(1, input.votes || cfg.votes || { light: 1, standard: 3, max: 5 }[fleet])
 const needed = Math.floor(votes / 2) + 1
 log(votes + ' skeptic vote(s) per finding, ' + needed + ' uphold(s) to survive')
 

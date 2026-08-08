@@ -54,6 +54,11 @@ jobs:
           [ "$(cat "$T/.claude/agents/user-own.md")" = "user-owned" ]
           grep -q 'fleet: light' "$T/.claude/fable/CONFIG.md" || { echo "update overwrote user CONFIG.md"; exit 1; }
           [ "$(cat "$T/.claude/settings.json")" = '{"permissions":{"allow":["Workflow"]}}' ] || { echo "update overwrote user settings.json"; exit 1; }
+      - name: update never re-creates a deleted settings.json (the opt-out)
+        run: |
+          rm "$T/.claude/settings.json"
+          ./install.sh --update "$T"
+          [ ! -e "$T/.claude/settings.json" ] || { echo "update re-created deleted settings.json"; exit 1; }
 
   install-ps1:
     runs-on: windows-latest
@@ -91,3 +96,7 @@ jobs:
           if ((Get-Content (Join-Path $t '.claude\agents\user-own.md')) -ne 'user-owned') { throw 'update touched a user-owned file' }
           if (-not (Select-String -Path (Join-Path $t '.claude\fable\CONFIG.md') -SimpleMatch 'fleet: light' -Quiet)) { throw 'update overwrote user CONFIG.md' }
           if ((Get-Content -Raw (Join-Path $t '.claude\settings.json')).Trim() -ne '{"permissions":{"allow":["Workflow"]}}') { throw 'update overwrote user settings.json' }
+
+          Remove-Item (Join-Path $t '.claude\settings.json')
+          .\install.ps1 -Target $t -Update
+          if (Test-Path (Join-Path $t '.claude\settings.json')) { throw 'update re-created deleted settings.json' }

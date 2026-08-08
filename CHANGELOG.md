@@ -2,6 +2,18 @@
 
 If a release ever removes a shipped file, the entry lists the stale path so `--update` users can delete it manually.
 
+## 2.0.1 — 2026-08-08
+
+Fixes from running the pack's own `fable-exhaust` over v2.0.0 (one fully verified round: 4 finders, 13 raw findings, three-lens skeptic panels; later finder rounds were cut off by a usage limit, so this was a bounded hunt, not a dry-out), plus fresh README graphics:
+
+- **Installers**: `--update` (and any re-run on an existing install) no longer re-creates a deleted `.claude/settings.json` — deleting it is the documented opt-out, and it is now truly first-install-only (keyed on the pre-existing VERSION stamp). CI asserts the opt-out on both platforms.
+- **fable-exhaust**: no longer crashes on a finding missing `title`/`file` or on a lost skeptic panel (guards added, drops announced); rounds where every finder failed no longer count as "ran dry" (a failed round is not evidence of coverage); the 200-location dedup-hint truncation is announced; the skeptic panel is now votes-sized (`fleet max` really means 5 votes — code now matches CONFIG.md's claim).
+- **fable-review**: vote count clamped to at least 1 — a zero/negative `votes` would have spawned no skeptics and marked every raw finding as verified.
+- **fable-migrate**: the pilot gate fails closed — a pilot whose transform/check never completed now aborts the fan-out instead of passing it.
+- **fable-design**: an all-judges-failed panel now errors instead of silently crowning approach 0.
+- **Docs**: fable-ship's description now matches its actual gate ordering (read-only gates in parallel, build/tests after, alone); the `/fable-config` recreation template carries the full shipped key set.
+- **README graphics**: new SVG set (value-dial, review-pipeline, demo-run with the real 2.0 dogfood numbers); social preview regenerated; the stale 1.0 screenshot removed.
+
 ## 2.0.0 — 2026-08-07
 
 The Claude 5 / value-maxxing release: pick your spend instead of prompting for it, tuned for the leaner Claude Code system prompts that shipped with the Claude 5 generation.

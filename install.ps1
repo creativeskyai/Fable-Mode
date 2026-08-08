@@ -63,13 +63,15 @@ foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
 }
 
 # First-run settings: materialize the template so Workflow/Agent launches don't
-# prompt (the pack's standing authorization). Never touches an existing file.
+# prompt (the pack's standing authorization). First install only — never touches
+# an existing file, and -Update never re-creates a deleted one (deleting it is
+# the documented opt-out).
 $settings = Join-Path $dest 'settings.json'
-if (-not (Test-Path -LiteralPath $settings)) {
+if (-not (Test-Path -LiteralPath $settings) -and -not $Update -and -not $installedVersion) {
     Copy-Item -LiteralPath (Join-Path $src 'fable\settings.template.json') -Destination $settings
     Write-Host 'created .claude/settings.json (pre-approves the Workflow and Agent tools; delete it to opt out)'
 }
-elseif (-not (Select-String -LiteralPath $settings -SimpleMatch '"Workflow"' -Quiet)) {
+elseif ((Test-Path -LiteralPath $settings) -and -not (Select-String -LiteralPath $settings -SimpleMatch '"Workflow"' -Quiet)) {
     Write-Host 'note: .claude/settings.json exists - to skip permission prompts on fleet launches, add "Workflow" and "Agent" to permissions.allow'
 }
 

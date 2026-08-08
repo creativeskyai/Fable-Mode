@@ -10,7 +10,7 @@ command — no restart.
 subagent_model: opus     # fable | opus | sonnet | haiku | inherit (= session model)
 subagent_effort: medium  # low | medium | high | xhigh | inherit
 fleet: standard          # light | standard | max — scales pools, votes, round caps
-# votes: 3               # skeptics per review finding (uncomment to override the fleet preset)
+# votes: 3               # skeptics per finding, review and exhaust (uncomment to override the fleet preset)
 # max_rounds: 6          # fable-exhaust round cap (uncomment to override the fleet preset)
 # max_leads: 30          # fable-research deep-read cap (uncomment to override the fleet preset)
 ```
