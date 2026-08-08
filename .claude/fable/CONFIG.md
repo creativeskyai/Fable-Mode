@@ -15,9 +15,15 @@ fleet: standard          # light | standard | max — scales pools, votes, round
 # max_leads: 30          # fable-research deep-read cap (uncomment to override the fleet preset)
 ```
 
-What `fleet` changes: **light** = smaller finder pools, 1 skeptic per finding,
-lower round and lead caps. **standard** = the shipped defaults (3 skeptics).
-**max** = 5-vote verification and raised caps, for audits.
+What `fleet` changes, concretely: **light** = 2 finder stances instead of 4
+(exhaust), 2 design stances and 2 judges instead of 3, 1 skeptic per finding
+instead of 3, 12 research leads instead of 30, round cap 3 instead of 6 — a
+`/fable-review` drops from roughly 16 agents to 6. **standard** = the shipped
+defaults. **max** = 5 skeptics per finding, 60 leads, round cap 8, for audits.
+
+Subagent thinking has no separate switch — it follows `subagent_effort`. Set
+`subagent_effort: low` for minimal subagent thinking; the skeptic/judge
+structure, not deliberation depth, is what carries verification quality.
 
 ## Main agent (set in the harness, recorded here)
 
