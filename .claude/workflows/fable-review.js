@@ -11,15 +11,27 @@ export const meta = {
 const input = typeof args === 'string' ? { target: args } : (args || {})
 const target = input.target ||
   'the uncommitted working-tree changes (run `git status` and `git diff HEAD` to see them); if the tree is clean, review the most recent commit (`git show HEAD`); if this is not a git repository, review the most recently modified source files'
-const votes = input.votes || 3
+// Config arrives via args.config — the skills read .claude/fable/CONFIG.md and pass it.
+// sub() applies the configured subagent model/effort to every agent call in run().
+const cfg = (input && input.config && typeof input.config === 'object') ? input.config : {}
+const fleet = ['light', 'standard', 'max'].includes(cfg.fleet) ? cfg.fleet : 'standard'
+const sub = opts => ({
+  ...opts,
+  ...(cfg.subagent_model && cfg.subagent_model !== 'inherit' ? { model: cfg.subagent_model } : {}),
+  ...(cfg.subagent_effort && cfg.subagent_effort !== 'inherit' ? { effort: cfg.subagent_effort } : {}),
+})
+if (cfg.subagent_model || cfg.subagent_effort || cfg.fleet) log('config: subagents on ' + (cfg.subagent_model || 'the session model') + ' at ' + (cfg.subagent_effort || 'session') + ' effort, fleet ' + fleet)
+
+const votes = input.votes || cfg.votes || { light: 1, standard: 3, max: 5 }[fleet]
 const needed = Math.floor(votes / 2) + 1
+log(votes + ' skeptic vote(s) per finding, ' + needed + ' uphold(s) to survive')
 
 // Falls back to the default agent when the pack's agents aren't registered yet
 // (agent types load at session start — a fresh install needs a restart).
-const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+const run = (prompt, opts) => agent(prompt, sub(opts)).catch(e => {
   if (!opts.agentType || !String(e).includes('not found')) throw e
   log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
-  return agent(prompt, { ...opts, agentType: undefined })
+  return agent(prompt, { ...sub(opts), agentType: undefined })
 })
 
 const FINDINGS = {
@@ -68,8 +80,12 @@ const LENSES = [
 // Must stay single-line — the drift checker compares this line byte-for-byte across workflows.
 const CONTRAST = 'First state the strongest concrete case that the claim is REAL, then the strongest case that it is NOT, then decide: set refuted=true only if the against-case wins under your lens, citing the decisive evidence.'
 
+// Fleet scaling — announced, per the no-silent-caps rule.
+const dimensions = fleet === 'light' ? DIMENSIONS.slice(0, 2) : DIMENSIONS
+if (dimensions.length < DIMENSIONS.length) log('fleet light: ' + dimensions.length + ' of ' + DIMENSIONS.length + ' finder dimensions (security and resources dropped)')
+
 const perDimension = await pipeline(
-  DIMENSIONS,
+  dimensions,
   d => run(
     'Review ' + target + '.\n\n' +
     'Focus exclusively on this dimension: ' + d.focus + '.\n\n' +

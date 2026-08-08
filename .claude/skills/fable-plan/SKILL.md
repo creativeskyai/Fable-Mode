@@ -6,6 +6,8 @@ argument-hint: "<design question>"
 
 The user invoked /fable-plan: that is explicit opt-in to workflow orchestration — call the Workflow tool.
 
+Before dispatching, read `.claude/fable/CONFIG.md` if it exists and pass its yaml keys as `config` in the workflow args; words in the user's request override it for this run ("quick" = fleet light, "thorough"/"audit" = fleet max).
+
 1. The arguments are the design question. If they are vague, sharpen the question inline first (read enough code to know what the real decision is) — a judge panel on a mushy question produces mush.
 2. Run the named workflow `fable-design` with `args: { question: "<the sharpened question>" }`.
 3. Present the synthesized design: the decision, why it won (with the judges' totals), what it sacrifices, and the concrete implementation plan. Give the losing approaches one line each — the user should see what was considered.

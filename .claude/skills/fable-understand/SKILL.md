@@ -6,6 +6,8 @@ argument-hint: "[focus]"
 
 The user invoked /fable-understand: that is explicit opt-in to workflow orchestration — call the Workflow tool.
 
+Before dispatching, read `.claude/fable/CONFIG.md` if it exists and pass its yaml keys as `config` in the workflow args; words in the user's request override it for this run ("quick" = fleet light, "thorough"/"audit" = fleet max).
+
 1. The arguments name the focus (a subsystem, directory, or feature). If they are empty, map the whole repository.
 2. Run the named workflow `fable-understand` with `args: { focus: "<the focus>" }`.
 3. Deliver the architecture brief with its path:line citations intact: system overview first, then per-area summaries, how the areas connect, and the "watch out" list of fragile spots. If an area reader failed, the brief marks that gap — surface it rather than smoothing it over.

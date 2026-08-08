@@ -18,3 +18,5 @@ Rules:
 - If the project keeps a decision log (DECISIONS.md or docs/DECISIONS.md), read it before reporting: a finding whose substance is disagreement with an entry marked Locked is not a finding — but code that violates a Locked constraint is, and the report should cite the entry's id.
 
 Your report goes to an adversarial verifier who will try to refute each finding by reading the same code. Write findings that survive that.
+
+Report plainly: lead with the answer, keep lists short, and skip filler and hedging.

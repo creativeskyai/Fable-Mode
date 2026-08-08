@@ -44,8 +44,14 @@ $skipped = 0
 foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
     $rel = $f.FullName.Substring($src.Length).TrimStart('\', '/')
     # Session-local / OS droppings are not pack files — never ship them.
-    if ($f.Name -in @('settings.local.json', 'scheduled_tasks.lock', '.DS_Store')) { Write-Host "skip (session-local): .claude\$rel"; continue }
+    if ($f.Name -in @('settings.json', 'settings.local.json', 'scheduled_tasks.lock', '.DS_Store')) { Write-Host "skip (session-local): .claude\$rel"; continue }
     $out = Join-Path $dest $rel
+    # CONFIG.md is user-owned tuning once installed — -Update never overwrites it.
+    if (($rel -replace '\\', '/') -eq 'fable/CONFIG.md' -and (Test-Path -LiteralPath $out) -and $Update) {
+        Write-Host "skip (user config): .claude\$rel"
+        $skipped++
+        continue
+    }
     if ((Test-Path -LiteralPath $out) -and -not $Update) {
         Write-Host "skip (exists): .claude\$rel"
         $skipped++
@@ -54,6 +60,17 @@ foreach ($f in Get-ChildItem -Path $src -Recurse -File) {
     New-Item -ItemType Directory -Force (Split-Path $out) | Out-Null
     Copy-Item -LiteralPath $f.FullName -Destination $out -Force
     $copied++
+}
+
+# First-run settings: materialize the template so Workflow/Agent launches don't
+# prompt (the pack's standing authorization). Never touches an existing file.
+$settings = Join-Path $dest 'settings.json'
+if (-not (Test-Path -LiteralPath $settings)) {
+    Copy-Item -LiteralPath (Join-Path $src 'fable\settings.template.json') -Destination $settings
+    Write-Host 'created .claude/settings.json (pre-approves the Workflow and Agent tools; delete it to opt out)'
+}
+elseif (-not (Select-String -LiteralPath $settings -SimpleMatch '"Workflow"' -Quiet)) {
+    Write-Host 'note: .claude/settings.json exists - to skip permission prompts on fleet launches, add "Workflow" and "Agent" to permissions.allow'
 }
 
 $claudeMd = Join-Path $Target 'CLAUDE.md'

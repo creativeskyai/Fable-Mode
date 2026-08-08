@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="300" viewBox="0 0 1280 300" role="img" aria-label="Fable Mode — Fable 5's Ultracode discipline for every Claude model, with a value dial">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12100e"/>
+      <stop offset="1" stop-color="#221c16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d97757"/>
+      <stop offset="1" stop-color="#8b7cff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="300" fill="url(#bg)"/>
+  <!-- fan-out motif: one node fans to a fleet, verified back to one -->
+  <g stroke="#4a4038" stroke-width="2" fill="none" opacity="0.9">
+    <path d="M950 150 C1000 150 1000 70 1050 70"/>
+    <path d="M950 150 C1000 150 1000 123 1050 123"/>
+    <path d="M950 150 C1000 150 1000 177 1050 177"/>
+    <path d="M950 150 C1000 150 1000 230 1050 230"/>
+    <path d="M1050 70 C1100 70 1100 150 1150 150"/>
+    <path d="M1050 123 C1100 123 1100 150 1150 150"/>
+    <path d="M1050 177 C1100 177 1100 150 1150 150"/>
+    <path d="M1050 230 C1100 230 1100 150 1150 150"/>
+  </g>
+  <circle cx="950" cy="150" r="9" fill="#d97757"/>
+  <g fill="#8b7cff">
+    <circle cx="1050" cy="70" r="6"/><circle cx="1050" cy="123" r="6"/>
+    <circle cx="1050" cy="177" r="6"/><circle cx="1050" cy="230" r="6"/>
+  </g>
+  <circle cx="1150" cy="150" r="9" fill="#3da638"/>
+  <text x="80" y="140" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="64" font-weight="700" fill="#f5efe6" letter-spacing="1">Fable Mode</text>
+  <rect x="84" y="164" width="240" height="5" rx="2.5" fill="url(#accent)"/>
+  <text x="80" y="212" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="24" fill="#c9bfae">Fable 5&#8217;s Ultracode discipline, as a drop-in Claude Code pack.</text>
+  <text x="80" y="246" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="24" fill="#c9bfae">Verified fleets on any Claude model &#8212; at the spend you choose.</text>
+</svg>

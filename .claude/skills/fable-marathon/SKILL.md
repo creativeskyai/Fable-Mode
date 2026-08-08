@@ -4,7 +4,7 @@ description: Continuous goal-directed operation across many cycles or sessions �
 argument-hint: "[goal]"
 ---
 
-The user invoked /fable-marathon: that is explicit opt-in to workflow orchestration and to checkpoint commits at verified milestones — call the Workflow tool and commit without asking again.
+The user invoked /fable-marathon: that is explicit opt-in to workflow orchestration and to checkpoint commits at verified milestones — call the Workflow tool and commit without asking again. Read `.claude/fable/CONFIG.md` once per cycle if it exists and pass its yaml keys as `config` in the args of every workflow the cycle dispatches.
 
 ## State
 

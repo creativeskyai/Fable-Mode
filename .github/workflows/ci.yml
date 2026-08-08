@@ -33,8 +33,10 @@ jobs:
           echo "T=$t" >> "$GITHUB_ENV"
           expected="$(git ls-files .claude | wc -l)"
           ./install.sh "$t"
+          # +1: the installer materializes .claude/settings.json from the shipped template
           copied="$(find "$t/.claude" -type f | wc -l)"
-          [ "$copied" -eq "$expected" ] || { echo "expected $expected files, found $copied"; exit 1; }
+          [ "$copied" -eq "$((expected + 1))" ] || { echo "expected $((expected + 1)) files, found $copied"; exit 1; }
+          cmp .claude/fable/settings.template.json "$t/.claude/settings.json"
           [ "$(grep -cF '@.claude/fable/FABLE.md' "$t/CLAUDE.md")" -eq 1 ]
       - name: second run is idempotent
         run: |
@@ -45,9 +47,13 @@ jobs:
         run: |
           echo tampered >> "$T/.claude/fable/FABLE.md"
           echo user-owned > "$T/.claude/agents/user-own.md"
+          echo 'fleet: light' >> "$T/.claude/fable/CONFIG.md"
+          echo '{"permissions":{"allow":["Workflow"]}}' > "$T/.claude/settings.json"
           ./install.sh --update "$T"
           cmp .claude/fable/FABLE.md "$T/.claude/fable/FABLE.md"
           [ "$(cat "$T/.claude/agents/user-own.md")" = "user-owned" ]
+          grep -q 'fleet: light' "$T/.claude/fable/CONFIG.md" || { echo "update overwrote user CONFIG.md"; exit 1; }
+          [ "$(cat "$T/.claude/settings.json")" = '{"permissions":{"allow":["Workflow"]}}' ] || { echo "update overwrote user settings.json"; exit 1; }
 
   install-ps1:
     runs-on: windows-latest
@@ -62,8 +68,10 @@ jobs:
           $expected = @(git ls-files .claude).Count
 
           .\install.ps1 -Target $t
+          # +1: the installer materializes .claude/settings.json from the shipped template
           $copied = @(Get-ChildItem -Recurse -File (Join-Path $t '.claude')).Count
-          if ($copied -ne $expected) { throw "expected $expected files, found $copied" }
+          if ($copied -ne ($expected + 1)) { throw "expected $($expected + 1) files, found $copied" }
+          if (-not (Test-Path (Join-Path $t '.claude\settings.json'))) { throw 'fresh install did not materialize settings.json' }
           $imports = @(Select-String -Path (Join-Path $t 'CLAUDE.md') -SimpleMatch '@.claude/fable/FABLE.md').Count
           if ($imports -ne 1) { throw "expected 1 import line, found $imports" }
 
@@ -74,8 +82,12 @@ jobs:
 
           Add-Content (Join-Path $t '.claude\fable\FABLE.md') 'tampered'
           Set-Content (Join-Path $t '.claude\agents\user-own.md') 'user-owned'
+          Add-Content (Join-Path $t '.claude\fable\CONFIG.md') 'fleet: light'
+          Set-Content (Join-Path $t '.claude\settings.json') '{"permissions":{"allow":["Workflow"]}}'
           .\install.ps1 -Target $t -Update
           $a = (Get-FileHash .claude\fable\FABLE.md).Hash
           $b = (Get-FileHash (Join-Path $t '.claude\fable\FABLE.md')).Hash
           if ($a -ne $b) { throw 'update did not restore FABLE.md byte-identical' }
           if ((Get-Content (Join-Path $t '.claude\agents\user-own.md')) -ne 'user-owned') { throw 'update touched a user-owned file' }
+          if (-not (Select-String -Path (Join-Path $t '.claude\fable\CONFIG.md') -SimpleMatch 'fleet: light' -Quiet)) { throw 'update overwrote user CONFIG.md' }
+          if ((Get-Content -Raw (Join-Path $t '.claude\settings.json')).Trim() -ne '{"permissions":{"allow":["Workflow"]}}') { throw 'update overwrote user settings.json' }

@@ -4,7 +4,7 @@ description: Session doctrine loader — reads the Fable Mode operating contract
 argument-hint: "[task]"
 ---
 
-Read `.claude/fable/FABLE.md` in the project root and follow it as your operating doctrine for the rest of the session. It governs pacing, orchestration, verification, and reporting; explicit user instructions in the conversation always override it.
+Read `.claude/fable/FABLE.md` in the project root and follow it as your operating doctrine for the rest of the session, including its Config section (`.claude/fable/CONFIG.md` sets workflow defaults). It governs pacing, orchestration, verification, and reporting; explicit user instructions in the conversation always override it.
 
 If the file does not exist, tell the user the Fable Mode pack is only partially installed (the doctrine file is missing) and continue without it.
 

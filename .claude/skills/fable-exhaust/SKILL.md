@@ -6,6 +6,8 @@ argument-hint: "[what to hunt] [scope]"
 
 The user invoked /fable-exhaust: that is explicit opt-in to workflow orchestration — call the Workflow tool. This is the most expensive skill in the pack — many agents over several rounds — so note that to the user in one line when you start.
 
+Before dispatching, read `.claude/fable/CONFIG.md` if it exists and pass its yaml keys as `config` in the workflow args; words in the user's request override it for this run ("quick" = fleet light, "thorough"/"audit" = fleet max).
+
 1. From the arguments, determine what to hunt and where. Defaults: hunt defects (logic bugs, unhandled edge cases, races, leaks, security flaws) across the whole repository.
 2. Run the named workflow `fable-exhaust` with `args: { hunt: "<what>", scope: "<where>" }`.
 3. Report the confirmed findings grouped by file, each with its failure scenario and `file:line`. State how many rounds ran and whether the hunt ran dry or stopped at the round/budget cap — the user must know whether coverage is complete.

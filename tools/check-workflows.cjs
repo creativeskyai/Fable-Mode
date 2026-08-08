@@ -82,6 +82,7 @@ for (const [f, raw] of workflowRaw) {
 // helper (and some share a LENSES panel). Identical-by-convention becomes
 // identical-by-check here.
 const TWINS = [
+  ['config block', /^const cfg = [\s\S]*?effort, fleet ' \+ fleet\)$/m],
   ['run() helper', /^const run = [\s\S]*?\n\}\)$/m],
   ['LENSES panel', /^const LENSES = \[[\s\S]*?\n\]$/m],
   // CONTRAST must stay single-line — this regex compares only the one line.
@@ -100,6 +101,14 @@ for (const [label, re] of TWINS) {
 // A file that deletes its copy of a twin block would silently drop out of the drift
 // comparison above — require the blocks where they are load-bearing.
 const REQUIRED_TWINS = { 'fable-review.js': ['const LENSES', 'const CONTRAST'], 'fable-exhaust.js': ['const LENSES', 'const CONTRAST'] };
+// Every workflow must carry the config block and the run() helper, matching the
+// twin regex exactly — an includes() check alone would let a copy whose anchor
+// lines were edited drop out of the drift comparison above while still "existing".
+for (const [f, raw] of workflowRaw) {
+  for (const [label, re] of TWINS.filter(([l]) => l === 'config block' || l === 'run() helper')) {
+    if (!re.test(raw)) bad(f, 'required shared block (' + label + ') is missing or its anchor lines have drifted from the canonical form');
+  }
+}
 for (const [f, needles] of Object.entries(REQUIRED_TWINS)) {
   for (const n of needles) {
     if (!(workflowRaw.get(f) || '').includes(n)) bad(f, 'expected twin block "' + n + '" is missing');

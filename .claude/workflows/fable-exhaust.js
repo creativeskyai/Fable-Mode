@@ -12,12 +12,23 @@ const input = typeof args === 'string' ? { hunt: args } : (args || {})
 const hunt = input.hunt || 'defects: logic bugs, unhandled edge cases, race conditions, resource leaks, and security flaws'
 const scope = input.scope || 'the entire repository'
 
+// Config arrives via args.config — the skills read .claude/fable/CONFIG.md and pass it.
+// sub() applies the configured subagent model/effort to every agent call in run().
+const cfg = (input && input.config && typeof input.config === 'object') ? input.config : {}
+const fleet = ['light', 'standard', 'max'].includes(cfg.fleet) ? cfg.fleet : 'standard'
+const sub = opts => ({
+  ...opts,
+  ...(cfg.subagent_model && cfg.subagent_model !== 'inherit' ? { model: cfg.subagent_model } : {}),
+  ...(cfg.subagent_effort && cfg.subagent_effort !== 'inherit' ? { effort: cfg.subagent_effort } : {}),
+})
+if (cfg.subagent_model || cfg.subagent_effort || cfg.fleet) log('config: subagents on ' + (cfg.subagent_model || 'the session model') + ' at ' + (cfg.subagent_effort || 'session') + ' effort, fleet ' + fleet)
+
 // Falls back to the default agent when the pack's agents aren't registered yet
 // (agent types load at session start — a fresh install needs a restart).
-const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+const run = (prompt, opts) => agent(prompt, sub(opts)).catch(e => {
   if (!opts.agentType || !String(e).includes('not found')) throw e
   log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
-  return agent(prompt, { ...opts, agentType: undefined })
+  return agent(prompt, { ...sub(opts), agentType: undefined })
 })
 
 const BUGS = {
@@ -65,19 +76,25 @@ const STANCES = [
   'hunt boundaries: empty, zero, negative, maximum, unicode, malformed input',
 ]
 
+// Fleet scaling — every bound is announced up front, per the no-silent-caps rule.
+const stances = fleet === 'light' ? STANCES.slice(0, 2) : STANCES
+const panel = fleet === 'light' ? LENSES.slice(0, 1) : LENSES
+const need = fleet === 'light' ? 1 : 2
+const MAX_ROUNDS = cfg.max_rounds || { light: 3, standard: 6, max: 8 }[fleet]
+log('fleet ' + fleet + ': ' + stances.length + ' finder stances per round, ' + panel.length + '-lens verification, round cap ' + MAX_ROUNDS)
+
 const key = b => b.file + ':' + b.line + ':' + b.title.toLowerCase().slice(0, 60)
 const seen = new Set()
 // Locations only (no titles) — this set is re-broadcast to every finder each round,
 // so it must stay small; the finders need "don't re-report here", not the details.
 const seenLocs = new Set()
 const confirmed = []
-const MAX_ROUNDS = 6
 let round = 0
 let dry = 0
 
 while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 40_000)) {
   round++
-  const found = (await parallel(STANCES.map((stance, i) => () =>
+  const found = (await parallel(stances.map((stance, i) => () =>
     run(
       'Hunt for ' + hunt + ' in ' + scope + '. Round ' + round + '. Your stance: ' + stance + '.' +
       (seenLocs.size ? '\nAlready found — do NOT re-report findings at these locations: ' + Array.from(seenLocs).slice(-200).join('; ') : ''),
@@ -95,14 +112,14 @@ while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 4
   fresh.forEach(b => { seen.add(key(b)); seenLocs.add(b.file + ':' + b.line) })
 
   const judged = await parallel(fresh.map(b => () =>
-    parallel(LENSES.map(lens => () =>
+    parallel(panel.map(lens => () =>
       run(
         'Claimed finding in ' + b.file + ':' + b.line + ' — "' + b.title + '". Scenario: ' + b.detail + '\n' +
         'Judge it through ONE lens only — ' + lens + '\n' +
         CONTRAST,
         { label: 'verify:' + b.file + ':' + b.line, phase: 'Verify', schema: VERDICT, agentType: 'fable-skeptic' }
       )))
-      .then(vs => ({ b, real: vs.filter(v => v && v.refuted === false).length >= 2 }))
+      .then(vs => ({ b, real: vs.filter(v => v && v.refuted === false).length >= need }))
   ))
   const kept = judged.filter(j => j.real).map(j => j.b)
   confirmed.push(...kept)

@@ -12,12 +12,23 @@ export const meta = {
 const input = typeof args === 'string' ? { scope: args } : (args || {})
 const scope = input.scope || 'the current state of this repository'
 
+// Config arrives via args.config — the skills read .claude/fable/CONFIG.md and pass it.
+// sub() applies the configured subagent model/effort to every agent call in run().
+const cfg = (input && input.config && typeof input.config === 'object') ? input.config : {}
+const fleet = ['light', 'standard', 'max'].includes(cfg.fleet) ? cfg.fleet : 'standard'
+const sub = opts => ({
+  ...opts,
+  ...(cfg.subagent_model && cfg.subagent_model !== 'inherit' ? { model: cfg.subagent_model } : {}),
+  ...(cfg.subagent_effort && cfg.subagent_effort !== 'inherit' ? { effort: cfg.subagent_effort } : {}),
+})
+if (cfg.subagent_model || cfg.subagent_effort || cfg.fleet) log('config: subagents on ' + (cfg.subagent_model || 'the session model') + ' at ' + (cfg.subagent_effort || 'session') + ' effort, fleet ' + fleet)
+
 // Falls back to the default agent when the pack's agents aren't registered yet
 // (agent types load at session start — a fresh install needs a restart).
-const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+const run = (prompt, opts) => agent(prompt, sub(opts)).catch(e => {
   if (!opts.agentType || !String(e).includes('not found')) throw e
   log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
-  return agent(prompt, { ...opts, agentType: undefined })
+  return agent(prompt, { ...sub(opts), agentType: undefined })
 })
 
 const MECH = {
@@ -80,7 +91,7 @@ const commands = (mech && mech.commands) || []
 const releaseNotes = (mech && mech.notes) || ''
 log(commands.length + ' project check(s) detected' + (commands.length ? ': ' + commands.map(c => c.purpose).join(', ') : ' — gates will note the absence'))
 
-const checks = await agent(
+const checks = await run(
   'Shipping ' + scope + '. Run each of these project checks and report every outcome verbatim — do not fix anything:\n' +
   (commands.length ? commands.map(c => c.purpose + ': ' + c.command).join('\n') : '(none detected — say so and report what you would have expected to find)'),
   { label: 'gate:checks', phase: 'Gate' }

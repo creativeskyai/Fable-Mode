@@ -8,11 +8,12 @@ A distributable Claude Code configuration pack. The deliverable is the `.claude/
 
 > **Everything under `.claude/` ships to every target project.** Repo-level files (CI, templates, assets, docs) live outside `.claude/`. Session-local or repo-local config never goes inside it.
 
-## The four layers
+## The five layers
 
 | Layer | Where | Referenced by |
 |---|---|---|
 | Doctrine | `.claude/fable/FABLE.md` | imported into the target's `CLAUDE.md` |
+| Config | `.claude/fable/CONFIG.md` | read by skills, passed to workflows as `args.config` (user-owned after install — `--update` skips it) |
 | Agents | `.claude/agents/fable-*.md` | `agentType` strings in workflows |
 | Workflows | `.claude/workflows/fable-*.js` | invoked by name from skills |
 | Skills | `.claude/skills/*/SKILL.md` | slash commands |
@@ -41,7 +42,8 @@ CI runs both, plus the PowerShell installer on Windows. A PR that fails the chec
 - Accept `args` as an object **or** a plain string (the harness may deliver JSON-encoded strings).
 - Announce every deliberate bound with `log()` — no silent caps.
 - Null-guard agent results; skipped or dead agents resolve to `null`.
-- Use the shared `run()` helper (not bare `agent()`) for any call passing `agentType` — it falls back to the default agent on fresh installs where agent types haven't registered yet.
+- Use the shared `run()` helper (not bare `agent()`) for every agent call — it falls back to the default agent on fresh installs where agent types haven't registered yet, and applies the configured subagent model/effort via `sub()`.
+- Carry the shared config block (`const cfg` … the `log('config: …')` line) above `run()` in every workflow; both blocks are drift-checked byte-for-byte and required by the checker. Fleet-dependent bounds derive from `cfg`/`fleet` and are announced with `log()`.
 
 ## Adding an agent, workflow, or skill
 

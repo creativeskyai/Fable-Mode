@@ -2,6 +2,18 @@
 
 If a release ever removes a shipped file, the entry lists the stale path so `--update` users can delete it manually.
 
+## 2.0.0 — 2026-08-07
+
+The Claude 5 / value-maxxing release: pick your spend instead of prompting for it, tuned for the leaner Claude Code system prompts that shipped with the Claude 5 generation.
+
+- **Config file** — `.claude/fable/CONFIG.md` sets the defaults every workflow runs with: `subagent_model` (ships as `opus`), `subagent_effort` (ships as `medium`), `fleet` (`light` / `standard` / `max` — each fleet carries its own vote count of 1/3/5), and optional `votes` / round / lead-cap overrides. Skills read it at invocation and pass it as `config` in workflow args, so edits apply to the next command with no restart. `--update` installs never overwrite it (CI-tested on both installers).
+- **`/fable-config`** — new skill (11th) to show settings, change keys, or apply presets: `value` (the shipped defaults), `light` (inherit/low, 1 skeptic), `max` (opus/high, 5 votes). It also prints the harness commands for the main agent — `/model`, `/effort`, thinking toggle — which a pack cannot set itself.
+- **All 7 workflows** honor the config: subagent model/effort applied to every agent call, fleet-scaled pools, votes, and caps, each announced with `log()` (no silent caps). The shared config block is drift-checked like the `run()` helper.
+- **Recommended setup** documented throughout: main agent Fable 5 at low effort (or Opus 5), subagents Opus at medium — lower effort with structural verification beats higher effort without it, at a fraction of the spend.
+- **Doctrine and reporting** rewritten for the Claude 5 generation: `FABLE.md` slimmed to judgment-over-rules, agents and scribe now report in plain language (lead with the answer, numbered steps, short lists, no filler).
+- **First-run settings** — a shipped template (`.claude/fable/settings.template.json`) is materialized as the target's `.claude/settings.json` on first install only, pre-approving the Workflow and Agent tools so fleet launches don't prompt. An existing settings file is never modified (the installer prints the two entries to add instead), `--update` never touches it, and deleting it opts out. Disclosed in SECURITY.md.
+- **README, GUIDE.md** rewritten shorter; new SVG banner. Removed: `assets/banner.png`, `assets/review-pipeline.png` (stale; `--update` users can delete them manually).
+
 ## 1.0.0 — 2026-07-10
 
 First public release, MIT licensed.

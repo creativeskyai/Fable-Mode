@@ -9,15 +9,27 @@ export const meta = {
   ],
 }
 
-const question = typeof args === 'string' ? args : (args && args.question)
+const input = typeof args === 'string' ? { question: args } : (args || {})
+const question = input.question
 if (!question) throw new Error('fable-design requires a design question — pass args: { question: "..." }')
+
+// Config arrives via args.config — the skills read .claude/fable/CONFIG.md and pass it.
+// sub() applies the configured subagent model/effort to every agent call in run().
+const cfg = (input && input.config && typeof input.config === 'object') ? input.config : {}
+const fleet = ['light', 'standard', 'max'].includes(cfg.fleet) ? cfg.fleet : 'standard'
+const sub = opts => ({
+  ...opts,
+  ...(cfg.subagent_model && cfg.subagent_model !== 'inherit' ? { model: cfg.subagent_model } : {}),
+  ...(cfg.subagent_effort && cfg.subagent_effort !== 'inherit' ? { effort: cfg.subagent_effort } : {}),
+})
+if (cfg.subagent_model || cfg.subagent_effort || cfg.fleet) log('config: subagents on ' + (cfg.subagent_model || 'the session model') + ' at ' + (cfg.subagent_effort || 'session') + ' effort, fleet ' + fleet)
 
 // Falls back to the default agent when the pack's agents aren't registered yet
 // (agent types load at session start — a fresh install needs a restart).
-const run = (prompt, opts) => agent(prompt, opts).catch(e => {
+const run = (prompt, opts) => agent(prompt, sub(opts)).catch(e => {
   if (!opts.agentType || !String(e).includes('not found')) throw e
   log(opts.agentType + ' not registered (restart the session after installing the pack) — using the default agent')
-  return agent(prompt, { ...opts, agentType: undefined })
+  return agent(prompt, { ...sub(opts), agentType: undefined })
 })
 
 const APPROACH = {
@@ -55,8 +67,11 @@ const STANCES = [
   'evolution-first: optimize for how this will be extended and maintained over the next year',
 ]
 
-const approaches = (await parallel(STANCES.map((stance, i) => () =>
-  agent(
+const stances = fleet === 'light' ? STANCES.slice(0, 2) : STANCES
+if (stances.length < STANCES.length) log('fleet light: ' + stances.length + ' of ' + STANCES.length + ' design stances (evolution-first dropped)')
+
+const approaches = (await parallel(stances.map((stance, i) => () =>
+  run(
     'Design question: ' + question + '\n\n' +
     'Explore the codebase first so the design is grounded in what actually exists — cite real files. ' +
     'Then produce ONE complete design, taking this stance: ' + stance + '. ' +
@@ -75,8 +90,10 @@ const briefFor = offset => approaches.map((_, k) => card((k + offset) % approach
 const brief = briefFor(0)
 
 const RUBRICS = ['correctness and edge-case coverage', 'implementation cost and risk', 'long-term maintainability']
+const rubrics = fleet === 'light' ? RUBRICS.slice(0, 2) : RUBRICS
+if (rubrics.length < RUBRICS.length) log('fleet light: ' + rubrics.length + ' of ' + RUBRICS.length + ' judge rubrics (maintainability dropped)')
 
-const judgments = (await parallel(RUBRICS.map((rubric, j) => () =>
+const judgments = (await parallel(rubrics.map((rubric, j) => () =>
   run(
     'Design question: ' + question + '\n\n' + briefFor(j) + '\n\n' +
     'Presentation order is arbitrary — the approach number in each header, not position, identifies a candidate. ' +
