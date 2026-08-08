@@ -105,7 +105,8 @@ if (files.length >= PILOT_MIN) {
     (result, f) => run(checkPrompt(f, result), { label: 'pilot-check:' + f, phase: 'Pilot', schema: CHECK, agentType: 'fable-skeptic' })
       .then(c => ({ file: f, ...(c || { ok: false, problems: 'checker did not complete' }) }))
   )
-  const pilotBad = pilotResults.filter(r => r && !r.ok)
+  // A pilot entry that never completed is a failed pilot, not a passed one — the gate fails closed.
+  const pilotBad = pilotResults.map((r, i) => r || { file: pilotFiles[i], ok: false, problems: 'pilot transform/check did not complete' }).filter(r => !r.ok)
   if (pilotBad.length) {
     log('pilot failed on ' + pilotBad.length + ' of ' + pilotFiles.length + ' file(s) — aborting the fan-out, ' + rest.length + ' file(s) left untouched')
     return {
@@ -128,7 +129,7 @@ const results = await pipeline(
     .then(c => ({ file: f, ...(c || { ok: false, problems: 'checker did not complete' }) }))
 )
 
-const bad = results.filter(r => r && !r.ok)
+const bad = results.map((r, i) => r || { file: rest[i], ok: false, problems: 'transform/check did not complete' }).filter(r => !r.ok)
 if (bad.length) log(bad.length + ' file(s) failed their per-file check — see perFileProblems')
 
 phase('Final verify')

@@ -102,6 +102,8 @@ const judgments = (await parallel(rubrics.map((rubric, j) => () =>
   )
 ))).filter(Boolean)
 
+if (!judgments.length) throw new Error('no judge scores were produced — an unjudged winner would be arbitrary; re-run fable-design')
+
 const totals = approaches.map((_, i) =>
   judgments.reduce((sum, j) => {
     const s = (j.scores || []).find(x => x.approach === i)

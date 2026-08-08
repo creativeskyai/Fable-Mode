@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="460" viewBox="0 0 1280 460" role="img" aria-label="The fable-review pipeline: your diff fans out to four finders (correctness, contracts, security, resources); every raw finding then faces a skeptic panel whose vote count comes from the fleet config; majority upholds and you see it, majority refutes and it dies in the pipeline.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12100e"/>
+      <stop offset="1" stop-color="#221c16"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="460" fill="url(#bg)"/>
+  <text x="640" y="48" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#f5efe6">Every finding goes on trial before it reaches you</text>
+
+  <!-- your diff -->
+  <rect x="60" y="190" width="170" height="70" rx="12" fill="#1c1712" stroke="#d97757" stroke-width="2"/>
+  <text x="145" y="220" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#f5efe6">your diff</text>
+  <text x="145" y="244" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#c9bfae">/fable-review</text>
+
+  <!-- finders -->
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" fill="#f5efe6">
+    <rect x="360" y="80"  width="200" height="52" rx="10" fill="#1c1712" stroke="#8b7cff" stroke-width="2"/><text x="460" y="112" text-anchor="middle">finder · correctness</text>
+    <rect x="360" y="160" width="200" height="52" rx="10" fill="#1c1712" stroke="#8b7cff" stroke-width="2"/><text x="460" y="192" text-anchor="middle">finder · contracts</text>
+    <rect x="360" y="240" width="200" height="52" rx="10" fill="#1c1712" stroke="#8b7cff" stroke-width="2"/><text x="460" y="272" text-anchor="middle">finder · security</text>
+    <rect x="360" y="320" width="200" height="52" rx="10" fill="#1c1712" stroke="#8b7cff" stroke-width="2"/><text x="460" y="352" text-anchor="middle">finder · resources</text>
+  </g>
+  <g stroke="#4a4038" stroke-width="2" fill="none">
+    <path d="M230 215 C300 215 300 106 360 106"/>
+    <path d="M230 220 C300 220 300 186 360 186"/>
+    <path d="M230 230 C300 230 300 266 360 266"/>
+    <path d="M230 235 C300 235 300 346 360 346"/>
+  </g>
+
+  <!-- skeptic panel -->
+  <rect x="680" y="150" width="250" height="150" rx="12" fill="#1c1712" stroke="#d97757" stroke-width="2"/>
+  <text x="805" y="186" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#f5efe6">skeptic panel</text>
+  <text x="805" y="214" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#c9bfae">per finding · three lenses:</text>
+  <text x="805" y="238" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#c9bfae">trace it · can it trigger · is it real impact</text>
+  <text x="805" y="272" text-anchor="middle" font-family="Consolas, Menlo, monospace" font-size="15" fill="#8b7cff">votes: fleet light 1 · standard 3 · max 5</text>
+  <g stroke="#4a4038" stroke-width="2" fill="none">
+    <path d="M560 106 C630 106 630 200 680 200"/>
+    <path d="M560 186 C630 186 630 215 680 215"/>
+    <path d="M560 266 C630 266 630 235 680 235"/>
+    <path d="M560 346 C630 346 630 250 680 250"/>
+  </g>
+
+  <!-- verdicts -->
+  <rect x="1050" y="120" width="170" height="64" rx="12" fill="#1c1712" stroke="#3da638" stroke-width="2"/>
+  <text x="1135" y="148" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#3da638">majority upholds</text>
+  <text x="1135" y="170" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#f5efe6">you see it</text>
+  <rect x="1050" y="270" width="170" height="64" rx="12" fill="#1c1712" stroke="#6b5d52" stroke-width="2"/>
+  <text x="1135" y="298" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#c9bfae">majority refutes</text>
+  <text x="1135" y="320" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#8a7d70">it dies here</text>
+  <g stroke="#4a4038" stroke-width="2" fill="none">
+    <path d="M930 200 C990 200 990 152 1050 152"/>
+    <path d="M930 250 C990 250 990 302 1050 302"/>
+  </g>
+
+  <text x="640" y="432" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" fill="#c9bfae">A plausible-but-wrong finding costs the pipeline, not twenty minutes of your time.</text>
+</svg>

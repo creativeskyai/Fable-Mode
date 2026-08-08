@@ -77,13 +77,17 @@ const STANCES = [
 ]
 
 // Fleet scaling — every bound is announced up front, per the no-silent-caps rule.
+// The skeptic panel is votes-sized (an explicit cfg.votes overrides the fleet),
+// cycling the three lenses; majority uphold to survive.
 const stances = fleet === 'light' ? STANCES.slice(0, 2) : STANCES
-const panel = fleet === 'light' ? LENSES.slice(0, 1) : LENSES
-const need = fleet === 'light' ? 1 : 2
+const votes = Math.max(1, cfg.votes || { light: 1, standard: 3, max: 5 }[fleet])
+const panel = Array.from({ length: votes }, (_, i) => LENSES[i % LENSES.length])
+const need = Math.floor(votes / 2) + 1
 const MAX_ROUNDS = cfg.max_rounds || { light: 3, standard: 6, max: 8 }[fleet]
-log('fleet ' + fleet + ': ' + stances.length + ' finder stances per round, ' + panel.length + '-lens verification, round cap ' + MAX_ROUNDS)
+log('fleet ' + fleet + ': ' + stances.length + ' finder stances per round, ' + votes + ' skeptic vote(s) per finding (' + need + ' to survive), round cap ' + MAX_ROUNDS)
 
-const key = b => b.file + ':' + b.line + ':' + b.title.toLowerCase().slice(0, 60)
+// Malformed structured output (missing file/title) is dropped and counted, never fatal.
+const key = b => b.file + ':' + b.line + ':' + String(b.title || '').toLowerCase().slice(0, 60)
 const seen = new Set()
 // Locations only (no titles) — this set is re-broadcast to every finder each round,
 // so it must stay small; the finders need "don't re-report here", not the details.
@@ -94,13 +98,22 @@ let dry = 0
 
 while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 40_000)) {
   round++
-  const found = (await parallel(stances.map((stance, i) => () =>
+  if (seenLocs.size > 200) log('dedup hint truncated to the most recent 200 of ' + seenLocs.size + ' known locations — older ones may be re-reported and re-deduped')
+  const finderResults = (await parallel(stances.map((stance, i) => () =>
     run(
       'Hunt for ' + hunt + ' in ' + scope + '. Round ' + round + '. Your stance: ' + stance + '.' +
       (seenLocs.size ? '\nAlready found — do NOT re-report findings at these locations: ' + Array.from(seenLocs).slice(-200).join('; ') : ''),
       { label: 'find:r' + round + 's' + (i + 1), phase: 'Find', schema: BUGS, agentType: 'fable-finder' }
     )
-  ))).filter(Boolean).flatMap(r => r.findings || [])
+  ))).filter(Boolean)
+  if (!finderResults.length) {
+    // A round nobody searched is a failed round, not a dry one — dry rounds claim coverage.
+    log('round ' + round + ': every finder failed or was skipped — not counted toward the dry-round stop')
+    continue
+  }
+  const reported = finderResults.flatMap(r => r.findings || []).filter(Boolean)
+  const found = reported.filter(b => b.file)
+  if (found.length < reported.length) log('round ' + round + ': dropped ' + (reported.length - found.length) + ' malformed finding(s) missing a file')
 
   const fresh = found.filter(b => !seen.has(key(b)))
   if (!fresh.length) {
@@ -121,7 +134,9 @@ while (dry < 2 && round < MAX_ROUNDS && (!budget.total || budget.remaining() > 4
       )))
       .then(vs => ({ b, real: vs.filter(v => v && v.refuted === false).length >= need }))
   ))
-  const kept = judged.filter(j => j.real).map(j => j.b)
+  const kept = judged.filter(Boolean).filter(j => j.real).map(j => j.b)
+  const lost = judged.filter(j => !j).length
+  if (lost) log('round ' + round + ': ' + lost + ' finding(s) lost their skeptic panel — not confirmed, not silently dropped')
   confirmed.push(...kept)
   log('round ' + round + ': ' + found.length + ' reported, ' + fresh.length + ' fresh, ' + kept.length + ' confirmed (total ' + confirmed.length + ')')
 }
