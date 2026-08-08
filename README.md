@@ -53,6 +53,8 @@ rm -f .claude/agents/fable-*.md .claude/workflows/fable-*.js
 
 ## The value setup
 
+<img src="assets/value-dial.svg" alt="Two dials: the main agent is a harness setting (/model Fable 5 or Opus 5, /effort low, thinking via Tab); subagents are set in CONFIG.md (opus at medium effort, fleet light/standard/max). Every fable workflow reads both and announces every bound it applies." width="100%">
+
 Two dials. The main agent is a harness setting; the subagents are the pack's config.
 
 | | Set with | Recommended |
@@ -118,21 +120,11 @@ One folder, five layers, wired by string name, with a [checker](tools/check-work
 
 The step most packs skip: **every raw finding goes on trial before it reaches you.** Skeptics judge each finding through different lenses (trace it line by line; is it reachable; is the impact real), majority verdict. A plausible-but-wrong finding dies in the pipeline instead of costing you twenty minutes.
 
-```mermaid
-flowchart LR
-    U["you: /fable-review"] --> W["fable-review.js"]
-    W --> F1["finder<br/>correctness"]
-    W --> F2["finder<br/>contracts"]
-    W --> F3["finder<br/>security"]
-    W --> F4["finder<br/>resources"]
-    F1 & F2 & F3 & F4 --> S{"skeptics vote<br/>per finding"}
-    S -->|"majority upholds"| OK["you see it"]
-    S -->|"majority refutes"| DEAD["it dies here"]
-```
+<img src="assets/review-pipeline.svg" alt="The fable-review pipeline: your diff fans out to four finders (correctness, contracts, security, resources); every raw finding faces a skeptic panel whose vote count comes from the fleet config; majority upholds and you see it, majority refutes and it dies in the pipeline" width="100%">
 
-A real run of this pipeline over this repo's own 1.0 release — 4 finders, 8 raw findings, 24 skeptic votes, 3 confirmed and fixed before merge:
+A real run of this pipeline over the 2.0.0 release branch itself — 4 finders, 5 raw findings, 15 skeptic votes, all 5 confirmed and fixed before merge:
 
-<img src="assets/demo-review.png" alt="Real fable-review run: 4 finders, 8 raw findings, 24 skeptic votes; 3 confirmed, 5 refuted as stale because the fixes had already landed" width="100%">
+<img src="assets/demo-run.svg" alt="Real fable-review run over the 2.0.0 release branch: config announced (fleet standard, 3 votes, 2 upholds to survive), 4 finders, 5 raw findings, 15 skeptic votes, 5 confirmed and all 5 fixed before merge in commit 83833c0" width="100%">
 
 For long jobs, `/fable-marathon` keeps all state in `FABLE-RUN.md` at the project root — goal, walls (actions that always queue for you), backlog with machine-checkable `done-when:` commands, journal — committed at every verified milestone, so any session resumes from the file alone. Unattended: `/loop /fable-marathon` or a scheduled task.
 

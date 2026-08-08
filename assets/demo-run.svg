@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="480" viewBox="0 0 1280 480" role="img" aria-label="Rendering of a real fable-review run over the 2.0.0 release branch: config announced, 4 finders, 5 raw findings, 15 skeptic votes, 5 confirmed and all 5 fixed before merge.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12100e"/>
+      <stop offset="1" stop-color="#221c16"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="480" fill="url(#bg)"/>
+  <!-- terminal window -->
+  <rect x="60" y="40" width="1160" height="380" rx="14" fill="#161210" stroke="#4a4038" stroke-width="2"/>
+  <circle cx="96" cy="72" r="7" fill="#d97757"/><circle cx="120" cy="72" r="7" fill="#c9bfae"/><circle cx="144" cy="72" r="7" fill="#3da638"/>
+  <text x="640" y="78" text-anchor="middle" font-family="Consolas, Menlo, monospace" font-size="15" fill="#8a7d70">fable-review · the 2.0.0 release branch, reviewed by its own fleet</text>
+
+  <g font-family="Consolas, Menlo, monospace" font-size="17">
+    <text x="100" y="122" fill="#c9bfae">$ /fable-review the 2.0 overhaul branch</text>
+    <text x="100" y="156" fill="#8b7cff">▸ config: subagents at medium effort, fleet standard</text>
+    <text x="100" y="184" fill="#8b7cff">▸ 3 skeptic vote(s) per finding, 2 uphold(s) to survive</text>
+    <text x="100" y="218" fill="#f5efe6">Review   find:correctness  find:contracts  find:security  find:resources</text>
+    <text x="100" y="246" fill="#f5efe6">Verify   5 raw findings → 15 independent skeptic votes</text>
+    <text x="100" y="284" fill="#3da638">✓ 5 of 5 findings survived cross-examination — most-severe first:</text>
+    <text x="120" y="314" fill="#c9bfae">major  CONFIG.md votes key silently pinned review verification …</text>
+    <text x="120" y="340" fill="#c9bfae">major  fleet presets unreachable through the documented command …</text>
+    <text x="120" y="366" fill="#8a7d70">+ 3 more (doc/code mismatches caught before any user hit them)</text>
+    <text x="100" y="402" fill="#3da638">✓ all 5 fixed and re-verified before merge — commit 83833c0</text>
+  </g>
+
+  <text x="640" y="454" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" fill="#c9bfae">Real run, real numbers — the pack gates its own releases with itself.</text>
+</svg>

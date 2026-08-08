@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-label="Two dials: the main agent is a harness setting (Fable 5 at low effort or Opus 5); subagents are set in CONFIG.md (opus at medium effort, fleet light, standard, or max). Both feed every fable workflow.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12100e"/>
+      <stop offset="1" stop-color="#221c16"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="420" fill="url(#bg)"/>
+  <text x="640" y="52" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#f5efe6">Two dials. You set the spend — nothing is inferred.</text>
+
+  <!-- Dial 1: main agent -->
+  <rect x="70" y="90" width="500" height="220" rx="14" fill="#1c1712" stroke="#4a4038" stroke-width="2"/>
+  <text x="100" y="132" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#d97757">1 · Main agent</text>
+  <text x="100" y="160" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" fill="#c9bfae">a harness setting</text>
+  <text x="100" y="200" font-family="Consolas, Menlo, monospace" font-size="18" fill="#f5efe6">/model   Fable 5  (or Opus 5)</text>
+  <text x="100" y="232" font-family="Consolas, Menlo, monospace" font-size="18" fill="#f5efe6">/effort  low</text>
+  <text x="100" y="264" font-family="Consolas, Menlo, monospace" font-size="18" fill="#f5efe6">thinking Tab toggle / /config</text>
+  <text x="100" y="294" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#8b7cff">low effort + structure beats high effort alone</text>
+
+  <!-- Dial 2: subagents -->
+  <rect x="710" y="90" width="500" height="220" rx="14" fill="#1c1712" stroke="#4a4038" stroke-width="2"/>
+  <text x="740" y="132" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#8b7cff">2 · Subagents</text>
+  <text x="740" y="160" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" fill="#c9bfae">.claude/fable/CONFIG.md — /fable-config, no restart</text>
+  <text x="740" y="200" font-family="Consolas, Menlo, monospace" font-size="18" fill="#f5efe6">subagent_model:  opus</text>
+  <text x="740" y="232" font-family="Consolas, Menlo, monospace" font-size="18" fill="#f5efe6">subagent_effort: medium</text>
+  <text x="740" y="264" font-family="Consolas, Menlo, monospace" font-size="18" fill="#f5efe6">fleet: light | standard | max</text>
+  <text x="740" y="294" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#8b7cff">light ≈ 6 agents per review · standard ≈ 16 · max = audits</text>
+
+  <!-- arrows to workflows -->
+  <g stroke="#4a4038" stroke-width="2" fill="none">
+    <path d="M320 310 C320 350 560 350 620 358"/>
+    <path d="M960 310 C960 350 720 350 660 358"/>
+  </g>
+  <circle cx="640" cy="362" r="8" fill="#3da638"/>
+  <text x="640" y="398" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" fill="#f5efe6">every fable workflow reads both — and announces every bound it applies</text>
+</svg>
